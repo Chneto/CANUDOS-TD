@@ -55,9 +55,10 @@ BarricadeSite
 
 O campo `attack_stop_point` precisa estar na rota e ao alcance de ataque da barricada. Se um ponto de barricada não tiver uma relação válida, o mapa falha na validação de conteúdo e não deve ser integrado ao combate. Isso evita inventar navegação dinâmica ou fazer a unidade atacar à distância.
 
-### Pendência de integração do mapa atual
+### Alinhamento de integração do mapa
 
-A especificação aprovada reserva barricadas em `(6,1)`, `(7,1)`, `(4,3)`, `(5,3)`, `(10,5)`, `(11,5)`, `(16,6)` e `(17,6)`. A rota desenhada passa por `(2,1)` e `(2,2)` antes de seguir pela linha 4; portanto, o par `(6,1)/(7,1)` está a mais de uma célula da rota. Ainda não há `attack_stop_point` para nenhum local. A equipe de mapa deve ajustar ou documentar uma ligação por local antes de T14; este registro não altera a especificação do Antigravity.
+A especificação do mapa foi atualizada para a **v1.1** pelo Antigravity em `docs/specs/map-mvp-specification.md`. As barricadas agora estão adjacentes à rota em `site_b1` (4,2/5,2), `site_b2` (8,5/9,5) e `site_b3` (16,7/17,7), e cada local possui seu respectivo `attack_stop_point` formalmente definido na rota (`Vector2(192, 160)`, `Vector2(448, 352)` e `Vector2(960, 480)`). O bloqueio de integração foi resolvido.
+
 
 ## 3. Dados de entidades
 

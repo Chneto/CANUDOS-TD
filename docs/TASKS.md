@@ -10,7 +10,7 @@
 | T02 | Especificar mapa MVP: rota, objetivo, zonas construíveis, pontos fixos e posições de barricada | Antigravity | concluída | T01, DEC-003 | docs/specs/map-mvp-specification.md aprovado com grid 64x64, layout e waypoints. |
 | T03 | Criar guia histórico mínimo para o MVP | Claude | a fazer | — | `docs/research/mvp-historical-guide.md` distingue fatos, ficção e itens a validar. |
 | T04 | Definir contratos de dados do MVP | Codex | em revisão | T01, T02 | `docs/specs/mvp-data-contracts.md` especifica mapa, inimigo, torre, barricada, eventos e estado de partida; pendência de integração registrada. |
-| T05 | Resolver integração das posições de barricada com a rota | Antigravity | bloqueada | T02, revisão T04 | Cada posição de barricada tem parada de ataque associada à rota; atualizar a especificação de mapa. |
+| T05 | Resolver integração das posições de barricada com a rota | Antigravity | concluída | T02, revisão T04 | docs/specs/map-mvp-specification.md v1.1 associa cada barricade_site ao seu attack_stop_point na rota. |
 
 ## Marco 1 — Ciclo jogável
 
