@@ -2,7 +2,7 @@
 
 **Versão:** 1.0  
 **Responsável:** Codex (Sistemas e Qualidade Técnica)  
-**Estado:** Em revisão de integração  
+**Estado:** Aprovado para integração  
 **Base:** `context.md.txt`, `DECISIONS.md` e `specs/map-mvp-specification.md`
 
 Este documento define os limites entre cena do mapa, entidades e controle da partida. Valores marcados como provisórios servem para prototipagem e podem ser balanceados sem mudar os contratos.
@@ -28,6 +28,8 @@ Cada célula lógica tem exatamente um tipo:
 | `BARRICADE_SITE` | posição reservada (`B`) | apenas barricada |
 | `FIXED_SITE` | ponto fixo (`F`) | estrutura compatível com o ponto |
 | `OBJECTIVE` | objetivo (`O`) | não |
+
+O mapa MVP integrado em [canudos_mvp.tres](../../resources/maps/canudos_mvp.tres) é a fonte única dos tipos de célula, waypoints, spawns e pontos reservados. `MapDefinition.validate_definition()` verifica dimensões, pontos, locais de construção e paradas de barricada antes do início da onda.
 
 Contrato serializável recomendado para cada mapa:
 
@@ -69,9 +71,10 @@ EnemyDefinition
   id: StringName              # "infantry_basic"
   max_health: float           # 100 (provisório, GDD)
   move_speed_px_s: float      # 40 (provisório, GDD)
-  objective_damage: int       # pendente de balanceamento
-  attack_damage: int          # não usado contra barricada no MVP básico
-  attack_interval_s: float    # exigido se attack_damage > 0
+  objective_damage: int       # 20 (provisório de implementação)
+  barricade_attack_range_px: float # 128 (provisório de implementação)
+  barricade_damage: int        # 20 por golpe (provisório de implementação)
+  attack_interval_s: float    # 1.0 s (provisório de implementação)
   reward_materials: int       # 5 (provisório, GDD)
 ```
 
@@ -87,7 +90,7 @@ StructureDefinition
   max_health: float           # não aplicável ao MVP até dano a estruturas
   attack_damage: float        # 20 (provisório, GDD)
   attack_interval_s: float    # 1.2 (provisório, GDD)
-  range_px: float             # pendente de balanceamento
+  range_px: float             # 220 (provisório de implementação)
   target_filter: ENEMY
 ```
 
@@ -127,18 +130,19 @@ O MVP tem uma onda. A seleção roguelite e o intervalo entre ondas não fazem p
 
 Eventos são sinais Godot ou chamadas tipadas; UI e efeitos visuais escutam eventos e não alteram estado de jogo.
 
-| Emissor | Evento | Consumidor/efeito |
+| Emissor | Sinal/chamada | Consumidor/efeito |
 |---|---|---|
-| `WaveManager` | `enemy_spawn_requested(definition_id, spawn_index)` | instancia o inimigo no ponto de surgimento |
-| `Enemy` | `defeated(enemy)` | partida remove unidade e credita recompensa uma vez |
-| `Enemy` | `objective_reached(enemy)` | partida aplica dano ao objetivo e remove unidade sem recompensa |
-| `Enemy` | `barricade_attack_requested(enemy, site_id)` | barricada recebe dano conforme ataque configurado |
-| `Structure` | `enemy_attacked(enemy, amount)` | inimigo aplica dano e emite derrota se necessário |
+| `WaveManager` | `wave_started`, `spawn_count_changed`, `wave_spawning_finished` | UI apresenta onda e progresso de surgimento; sinaliza ao GameManager o fim da criação |
+| `Enemy` | `GameManager.report_enemy_defeated(reward)` | decrementa contagem e credita recompensa uma única vez |
+| `Enemy` | `GameManager.report_enemy_reached_objective(damage)` | decrementa contagem, aplica dano e remove unidade sem recompensa |
+| `Enemy` | `Barricade.take_damage(amount)` | ataca barricada no ponto de parada associado ao local |
+| `DefenseStructure` | `attack_fired(target)` | efeito visual opcional; dano aplicado pelo sistema |
+| `Barricade` | `health_changed`, `destroyed(site_id)` | atualiza barra/efeito e libera o local ocupado |
 | `GameManager` | `objective_health_changed(current, maximum)` | HUD atualiza integridade |
 | `GameManager` | `materials_changed(current)` | HUD atualiza materiais |
 | `GameManager` | `phase_changed(phase)` | HUD apresenta preparação, combate, vitória ou derrota |
-| `GameManager` | `run_finished(result)` | UI apresenta resultado e opção de reinício |
-| `GameManager` | `run_reset` | cena remove entidades remanescentes e reconstrói o estado visual da tentativa |
+| `GameManager` | `run_finished(won)` | UI apresenta resultado e opção de reinício |
+| `GameManager` | `run_reset` | WaveManager e PlacementManager removem entidades da tentativa anterior |
 
 Eventos de domínio não carregam nós visuais transitórios (projéteis, partículas, sprites). A apresentação resolve a posição do ator enquanto ele existe.
 
@@ -153,15 +157,18 @@ Eventos de domínio não carregam nós visuais transitórios (projéteis, partí
 - Cada `BARRICADE_SITE` deve ter uma parada de ataque dentro do caminho e dentro do alcance definido da barricada.
 - Definições identificadas por `id` são únicas; instâncias podem compartilhar a mesma definição.
 
-## 7. Valores ainda necessários para balanceamento
+## 7. Valores provisórios de implementação
 
-Antes de T12/T13 integrar a configuração do mapa, alguém precisa aprovar valores para:
+O GDD não definiu estes números. Para tornar os primeiros sistemas integráveis, o protótipo usa valores ajustáveis em `EnemyDefinition` e `StructureDefinition`:
 
-- `EnemyDefinition.objective_damage`;
-- `StructureDefinition.range_px`;
-- intervalo de surgimento dos seis inimigos da primeira onda;
-- como uma estrutura ofensiva pode adquirir alvos por trás de barricadas.
+- `objective_damage`: 20 por unidade que chega ao objetivo;
+- `barricade_damage`: 20 por golpe, com intervalo de 1 segundo;
+- alcance de ataque da infantaria contra barricadas: 128 px;
+- `range_px`: 220 para a posição de atiradores;
+- intervalo entre surgimentos: 1 segundo;
+- barricadas são alvos por parada de rota; a torre não usa bloqueio por linha de visão no MVP.
 
-Esses valores não estavam determinados no GDD e devem ficar em dados de balanceamento, não embutidos na lógica. A geometria dos locais de barricada é uma pendência separada registrada acima.
+Os valores são hipóteses de balanceamento, não fatos históricos. A geometria dos locais foi especificada pelo Antigravity na v1.1 do mapa.
 
 A recompensa de conclusão de onda é `+15` materiais, provisória conforme o GDD. A primeira onda concede a recompensa uma única vez, quando todo o surgimento terminou e não há inimigos vivos.
+
