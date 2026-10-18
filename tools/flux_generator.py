@@ -15,6 +15,7 @@ def generate_image(prompt, filename, width=896, height=1152, steps=5, cfg_scale=
         "width": width,
         "height": height,
         "sampler_name": "Euler",
+        "scheduler": "Simple",
         "override_settings": {
             "sd_model_checkpoint": "flux1-schnell-fp8.safetensors"
         }

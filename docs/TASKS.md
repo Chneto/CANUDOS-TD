@@ -11,6 +11,7 @@
 | T03 | Criar guia histórico mínimo para o MVP | Claude | a fazer | — | `docs/research/mvp-historical-guide.md` distingue fatos, ficção e itens a validar. |
 | T04 | Definir contratos de dados do MVP | Codex | em revisão | T01, T02 | `docs/specs/mvp-data-contracts.md` especifica mapa, inimigo, torre, barricada, eventos e estado de partida; pendência de integração registrada. |
 | T05 | Resolver integração das posições de barricada com a rota | Antigravity | concluída | T02, revisão T04 | docs/specs/map-mvp-specification.md v1.1 associa cada barricade_site ao seu attack_stop_point na rota. |
+| T06 | Gerar e integrar sprites e tilesets do MVP via FLUX | Antigravity | concluída | T02, DEC-002 | Assets raw gerados no FLUX Schnell e sprites processados com fundo transparente em assets/sprites/. |
 
 ## Marco 1 — Ciclo jogável
 
