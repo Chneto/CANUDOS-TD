@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StructureDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/structure_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"barricade_basic"
+display_name = "Barricada"
+kind = 1
+placement_rule = 2
+cost_materials = 25
+footprint_cells = Array[Vector2i]([Vector2i(0, 0), Vector2i(1, 0)])
+max_health = 300.0
+attack_damage = 0.0
+attack_interval_s = 1.0
+attack_range_px = 1.0

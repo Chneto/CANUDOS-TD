@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuildSiteDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/build_site_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+site_id = &"site_b1"
+site_type = 1
+cells = Array[Vector2i]([Vector2i(4, 2), Vector2i(5, 2)])
+attack_stop_point = Vector2(192, 160)

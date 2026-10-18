@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"infantry_basic"
+display_name = "Infantaria"
+max_health = 100.0
+move_speed_px_s = 40.0
+objective_damage = 20
+barricade_attack_range_px = 128.0
+barricade_damage = 20
+attack_interval_s = 1.0
+reward_materials = 5

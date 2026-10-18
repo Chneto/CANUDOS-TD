@@ -1,0 +1,105 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scenes/map/map.gd" id="1_map_script"]
+[ext_resource type="Resource" path="res://resources/maps/canudos_mvp.tres" id="2_map_def"]
+[ext_resource type="Resource" path="res://resources/definitions/shooter_post.tres" id="3_sniper_def"]
+[ext_resource type="Resource" path="res://resources/definitions/barricade_basic.tres" id="4_barricade_def"]
+[ext_resource type="Script" path="res://scripts/systems/game_manager.gd" id="5_gm_script"]
+[ext_resource type="Script" path="res://scripts/systems/wave_manager.gd" id="6_wm_script"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy_republican.tscn" id="7_enemy_scene"]
+[ext_resource type="Resource" path="res://resources/definitions/enemy_basic.tres" id="8_enemy_def"]
+[ext_resource type="Script" path="res://scripts/systems/placement_manager.gd" id="9_pm_script"]
+[ext_resource type="PackedScene" path="res://scenes/towers/tower_sniper.tscn" id="10_sniper_scene"]
+[ext_resource type="PackedScene" path="res://scenes/towers/tower_barricade.tscn" id="11_barricade_scene"]
+
+[sub_resource type="Curve2D" id="Curve2D_path"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 64, 96, 0, 0, 0, 0, 192, 96, 0, 0, 0, 0, 192, 288, 0, 0, 0, 0, 448, 288, 0, 0, 0, 0, 448, 416, 0, 0, 0, 0, 960, 416, 0, 0, 0, 0, 960, 608)
+}
+point_count = 7
+
+[node name="Map" type="Node2D"]
+script = ExtResource("1_map_script")
+map_definition = ExtResource("2_map_def")
+shooter_definition = ExtResource("3_sniper_def")
+barricade_definition = ExtResource("4_barricade_def")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("5_gm_script")
+
+[node name="EnemyPath" type="Path2D" parent="."]
+curve = SubResource("Curve2D_path")
+
+[node name="WaveManager" type="Node" parent="."]
+script = ExtResource("6_wm_script")
+game_manager = NodePath("../GameManager")
+map_definition = ExtResource("2_map_def")
+path_node = NodePath("../EnemyPath")
+enemy_scene = ExtResource("7_enemy_scene")
+enemy_definition = ExtResource("8_enemy_def")
+enemies_in_wave = 6
+spawn_interval_s = 1.0
+
+[node name="PlacementManager" type="Node2D" parent="."]
+script = ExtResource("9_pm_script")
+map_definition = ExtResource("2_map_def")
+game_manager = NodePath("../GameManager")
+shooter_scene = ExtResource("10_sniper_scene")
+barricade_scene = ExtResource("11_barricade_scene")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="PanelTop" type="PanelContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 45.0
+grow_horizontal = 2
+
+[node name="HBox" type="HBoxContainer" parent="UI/PanelTop"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LabelPhase" type="Label" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = "Fase: PREPARAÇÃO"
+
+[node name="LabelHealth" type="Label" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = "Igreja: 100/100 HP"
+
+[node name="LabelMaterials" type="Label" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = "Materiais: 120"
+
+[node name="LabelEnemies" type="Label" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = "Inimigos: 0"
+
+[node name="BtnStartWave" type="Button" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = " Iniciar Combate "
+
+[node name="PanelBottom" type="PanelContainer" parent="UI"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -45.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBox" type="HBoxContainer" parent="UI/PanelBottom"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="BtnBuildSniper" type="Button" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = " Atirador Jagunço (60 M) "
+
+[node name="BtnBuildBarricade" type="Button" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = " Barricada de Taipa (40 M) "
+
+[node name="LabelStatus" type="Label" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = "Selecione uma estrutura para construir ou inicie o combate."

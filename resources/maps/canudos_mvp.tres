@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/map_definition.gd" id="1_script"]
+[ext_resource type="Resource" path="res://resources/sites/site_b1.tres" id="2_b1"]
+[ext_resource type="Resource" path="res://resources/sites/site_b2.tres" id="3_b2"]
+[ext_resource type="Resource" path="res://resources/sites/site_b3.tres" id="4_b3"]
+[ext_resource type="Resource" path="res://resources/sites/site_f1.tres" id="5_f1"]
+[ext_resource type="Resource" path="res://resources/sites/site_f2.tres" id="6_f2"]
+[ext_resource type="Resource" path="res://resources/sites/site_f3.tres" id="7_f3"]
+
+[resource]
+script = ExtResource("1_script")
+map_id = &"canudos_mvp"
+grid_size = Vector2i(20, 11)
+cell_size_px = 64
+cell_types = PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0)
+spawn_positions = PackedVector2Array(64, 96)
+path_points = PackedVector2Array(64, 96, 192, 96, 192, 288, 448, 288, 448, 416, 960, 416, 960, 608)
+objective_cells = Array[Vector2i]([Vector2i(14, 9), Vector2i(15, 9), Vector2i(16, 9), Vector2i(17, 9), Vector2i(14, 10), Vector2i(15, 10), Vector2i(16, 10), Vector2i(17, 10)])
+barricade_sites = [ExtResource("2_b1"), ExtResource("3_b2"), ExtResource("4_b3")]
+fixed_sites = [ExtResource("5_f1"), ExtResource("6_f2"), ExtResource("7_f3")]
