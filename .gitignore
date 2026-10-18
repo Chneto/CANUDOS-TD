@@ -1,0 +1,15 @@
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Arquivos locais de agentes e ferramentas
+.env
+.env.*
+!.env.example
+*.log
+
+# Godot 4: cache e arquivos gerados localmente
+.godot/
