@@ -1,6 +1,6 @@
 # Especificação do Mapa MVP — Canudos: A Última Resistência
 
-**Versão:** 1.1 (Revisada com attack_stop_points e alinhamento de barricadas)  
+**Versão:** 1.2 (Pontos fixos F1 e F3 trazidos para o alcance da rota — T17)  
 **Autor:** Antigravity (Apresentação e Editor)  
 **Status:** Aprovado  
 **Decisões Relacionadas:** `DEC-001`, `DEC-002`, `DEC-003`, `DEC-004`, `DEC-005`
@@ -23,14 +23,14 @@ A rota inimiga possui 2 células de largura (`[R]`). As barricadas (`[B]`) estã
 ```
        00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
 Row 00 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X] (Borda Norte - Cactos/Pedras)
-Row 01 [S][S][R][R][X][X][X][X][F][F][X][X][X][X][X][X][X][X][X][X] (S = Ponto de Surgimento)
-Row 02 [X][X][R][R][B1][B1][X][X][X][X][X][X][X][X][X][X][X][X][X][X] (B1 = Barricada 1 em (4,2) e (5,2))
+Row 01 [S][S][R][R][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X][X] (S = Ponto de Surgimento)
+Row 02 [X][X][R][R][B1][B1][X][X][F][F][X][X][X][X][X][X][X][X][X][X] (B1 = Barricada 1 em (4,2) e (5,2))
 Row 03 [X][X][R][R][X][X][X][X][X][X][F][F][X][X][X][X][X][X][X][X]
 Row 04 [X][X][R][R][R][R][R][R][X][X][X][X][X][X][X][X][X][X][X][X] (Curva horizontal)
 Row 05 [X][X][X][X][X][X][R][R][B2][B2][X][X][X][X][X][X][X][X][X][X] (B2 = Barricada 2 em (8,5) e (9,5))
-Row 06 [X][X][X][X][X][X][R][R][R][R][R][R][R][R][R][R][X][X][X][X]
+Row 06 [X][X][X][F][F][X][R][R][R][R][R][R][R][R][R][R][X][X][X][X]
 Row 07 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][R][R][B3][B3][X][X] (B3 = Barricada 3 em (16,7) e (17,7))
-Row 08 [X][X][F][F][X][X][X][X][X][X][X][X][X][X][R][R][X][X][X][X]
+Row 08 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][R][R][X][X][X][X]
 Row 09 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][O][O][O][O][X][X] (O = Objetivo: Igreja de Canudos)
 Row 10 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][O][O][O][O][X][X] (Entrada de Belo Monte)
 ```
@@ -42,7 +42,8 @@ Row 10 [X][X][X][X][X][X][X][X][X][X][X][X][X][X][O][O][O][O][X][X] (Entrada de 
   - `barricade_site_1`: Células `(4, 2)` e `(5, 2)` — Adjacentes à descida da rota.
   - `barricade_site_2`: Células `(8, 5)` e `(9, 5)` — Adjacentes à segunda curva.
   - `barricade_site_3`: Células `(16, 7)` e `(17, 7)` — Barricada final na entrada do arraial.
-- `[F]` **Pontos Fixos de Atirador:** Células elevadas em `(8, 1)`, `(9, 1)`, `(10, 3)`, `(11, 3)`, `(2, 8)`, `(3, 8)`.
+- `[F]` **Pontos Fixos de Atirador:** Células elevadas em `(8, 2)`, `(9, 2)`, `(10, 3)`, `(11, 3)`, `(3, 6)`, `(4, 6)`.
+  - Na v1.1, F1 ficava em `(8, 1)`/`(9, 1)` e F3 em `(2, 8)`/`(3, 8)`: a 231 px e 256 px da rota, fora do alcance de 220 px do atirador, e não disparavam. Na v1.2 cada ponto fixo alcança parte da rota: F1 cobre 101 px, F2 215 px e F3 461 px.
 - `[O]` **Objetivo Principal (Igreja de Belo Monte):** Retângulo de células de `(14, 9)` a `(17, 10)`.
 
 ---
