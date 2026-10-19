@@ -1,0 +1,646 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canudos: A Última Resistência</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&family=Holtwood+One+SC&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Menu inicial em tela cheia sobre o papel de parede. No jogo, o mapa ocupa a tela inteira
+   na horizontal, com as placas de situação no alto e os comandos embaixo, por cima do mapa.
+   Entre as fases, a história em tela cheia.
+   O cabeçalho é a capa de um folheto de cordel: papel amarelo e letra de tipo de madeira. */
+:root {
+  --chao: #DDD5C3;
+  --papel: #F1EADB;
+  --tinta: #211B14;
+  --tinta-2: #5C5143;
+  --sol: #DFA823;
+  --sol-tinta: #211B14;
+  --barro: #9A4A2A;
+  --caatinga: #536636;
+  --fio: rgba(33, 27, 20, .2);
+  --noite: #120E14;
+  --creme: #F3E7CC;
+  --fonte-titulo: "Holtwood One SC", "Rockwell Extra Bold", Rockwell, Georgia, serif;
+  --fonte-texto: "Alegreya", Georgia, "Times New Roman", serif;
+  --fonte-rotulo: "Alegreya SC", "Alegreya", Georgia, serif;
+  /* placas do jogo em tela cheia, sobre o mapa */
+  --placa: rgba(24, 15, 9, .88);
+  --placa-borda: #7A5A34;
+  --placa-tinta: #F3E7CC;
+  --placa-tinta-2: #C9B48C;
+  --ouro: #E7BD4F;
+  --ouro-tinta: #1D120C;
+  --verde: #9FC25A;
+  --perigo: #E0603E;
+  --fonte-pixel: "Pixelify Sans", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --chao: #16130F; --papel: #221D16; --tinta: #EEE5D1; --tinta-2: #B3A68D;
+    --sol: #D9A42B; --sol-tinta: #1A150F; --barro: #D57D55; --caatinga: #A0B373;
+    --fio: rgba(238, 229, 209, .18); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --chao: #16130F; --papel: #221D16; --tinta: #EEE5D1; --tinta-2: #B3A68D;
+  --sol: #D9A42B; --sol-tinta: #1A150F; --barro: #D57D55; --caatinga: #A0B373;
+  --fio: rgba(238, 229, 209, .18); color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+body {
+  background: var(--chao);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 16px;
+  line-height: 1.45;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--sol); outline-offset: 2px; }
+
+/* ── Menu inicial ── */
+.com-menu .pagina { display: none; }
+.inicio {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--noite);
+  color: var(--creme);
+  overflow: auto;
+}
+.inicio-fundo {
+  position: absolute;
+  inset: 0;
+  /* Sem a imagem, uma noite de lua vermelha sobre o sertão faz as vezes do papel de parede. */
+  background:
+    radial-gradient(circle at 64% 24%, #E6743F 0 9%, #B9472C 13%, rgba(185, 71, 44, .35) 19%, transparent 30%),
+    linear-gradient(transparent 62%, #2B1A14 62.5%, #3A2418 100%),
+    linear-gradient(#141026 0%, #2B1B3A 38%, #6A3238 56%, #B46A3C 62%);
+}
+.tem-capa .inicio-fundo { background: url("capa.jpg") center 30% / cover no-repeat, var(--noite); }
+.inicio-fundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(14, 10, 12, .9) 0%, rgba(14, 10, 12, .72) 30%, rgba(14, 10, 12, .15) 58%, transparent 75%);
+}
+.inicio-painel {
+  position: relative;
+  min-height: 100%;
+  box-sizing: border-box;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  padding-block: max(40px, env(safe-area-inset-top, 0px)) max(32px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(clamp(20px, 6vw, 88px), env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+.inicio-sobre { margin: 0; font-family: var(--fonte-rotulo); font-weight: 700; letter-spacing: .14em; font-size: 15px; color: #E6C77E; }
+.inicio-titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  font-size: clamp(44px, 7.5vw, 88px);
+  line-height: .9;
+  color: var(--creme);
+  text-shadow: 0 3px 0 rgba(0, 0, 0, .55);
+}
+.submenu .inicio-titulo { font-size: clamp(36px, 4.6vw, 56px); }
+.submenu .inicio-painel { gap: 16px; }
+.inicio-sub {
+  justify-self: start;
+  align-self: flex-start;
+  margin: -6px 0 0;
+  padding: 3px 12px 4px;
+  background: #DFA823;
+  color: #211B14;
+  font-family: var(--fonte-rotulo);
+  font-weight: 700;
+  font-size: clamp(17px, 2vw, 22px);
+  letter-spacing: .06em;
+}
+.inicio-menu { display: grid; gap: 10px; margin-top: 8px; }
+.inicio-menu button, .inicio-acoes button {
+  text-align: left;
+  border: 2px solid #F3E7CC;
+  background: rgba(243, 231, 204, .08);
+  color: var(--creme);
+  font-family: var(--fonte-titulo);
+  font-size: 21px;
+  letter-spacing: .04em;
+  padding: 11px 18px 12px;
+  cursor: pointer;
+  transition: background-color .15s, color .15s, transform .15s;
+}
+.inicio-menu button:hover, .inicio-menu button:focus-visible, .inicio-acoes button:hover {
+  background: #DFA823;
+  border-color: #DFA823;
+  color: #211B14;
+  transform: translateX(4px);
+}
+.inicio-menu button.principal { background: #DFA823; border-color: #DFA823; color: #211B14; }
+.inicio-caixa {
+  background: rgba(20, 14, 16, .82);
+  border: 1.5px solid rgba(243, 231, 204, .5);
+  padding: 16px 18px 18px;
+  display: grid;
+  gap: 14px;
+}
+.inicio-caixa h2 { margin: 0; font-family: var(--fonte-titulo); font-weight: 400; font-size: 24px; color: var(--creme); }
+.inicio-caixa p { margin: 0; color: #E3D6BA; }
+.opcao { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: start; cursor: pointer; }
+.opcao input { margin-top: 5px; width: 18px; height: 18px; accent-color: #DFA823; }
+.opcao span { font-weight: 700; }
+.opcao small { grid-column: 2; color: #CDBF9F; font-size: 14.5px; }
+.opcao-vel { display: grid; gap: 6px; }
+.opcao-vel span { font-weight: 700; }
+.opcao-vel .velocidades button { border-color: #F3E7CC; background: transparent; color: var(--creme); }
+.opcao-vel .velocidades button[aria-pressed="true"] { background: #F3E7CC; color: #211B14; }
+.inicio-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.inicio-acoes button { font-size: 17px; padding: 8px 16px 9px; }
+.inicio-versao { margin: 0; font-size: 14px; color: #BFAF8E; }
+@media (prefers-reduced-motion: reduce) {
+  .inicio-menu button, .inicio-acoes button { transition: none; }
+  .inicio-menu button:hover, .inicio-menu button:focus-visible, .inicio-acoes button:hover { transform: none; }
+}
+
+/* ── Vinheta do estúdio, antes do menu ── */
+.abertura { position: fixed; inset: 0; z-index: 30; background: var(--noite); cursor: pointer; transition: opacity .45s ease; }
+.abertura canvas { display: block; width: 100%; height: 100%; }
+.abertura.saindo { opacity: 0; }
+.abertura-dica {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  margin: 0;
+  text-align: center;
+  font: 14px var(--fonte-pixel);
+  letter-spacing: .06em;
+  color: #8F7F6A;
+  opacity: 0;
+  animation: dica-aparece .4s ease 1s forwards;
+}
+@keyframes dica-aparece { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .abertura { transition: none; }
+  .abertura-dica { animation: none; opacity: 1; }
+}
+
+/* ── Como jogar (no menu) ── */
+.inicio-caixa.ajuda { max-height: none; }
+.inicio-caixa ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; color: #E3D6BA; }
+.inicio-caixa h3 { margin: 4px 0 0; font-family: var(--fonte-rotulo); font-weight: 700; font-size: 17px; letter-spacing: .04em; color: var(--creme); }
+kbd {
+  font-family: var(--fonte-texto);
+  font-weight: 700;
+  font-size: .9em;
+  border: 1px solid #BFAF8E;
+  border-bottom-width: 2px;
+  padding: 0 5px;
+}
+
+/* ── Jogo em tela cheia ── */
+.com-menu .jogo, .com-historia .jogo { visibility: hidden; }
+.em-jogo, .em-jogo body { overflow: hidden; }
+.jogo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ouro-tinta);
+  color: var(--placa-tinta);
+  font-family: var(--fonte-pixel);
+}
+#tela { position: absolute; display: block; touch-action: manipulation; cursor: pointer; }
+.jogo button { cursor: pointer; }
+.jogo button:disabled { cursor: default; }
+
+.barra-topo, .barra-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.barra-topo > *, .barra-base > * { pointer-events: auto; }
+.barra-topo { top: 0; padding-top: max(10px, env(safe-area-inset-top, 0px)); flex-wrap: wrap; align-items: stretch; }
+.barra-base {
+  bottom: 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  align-items: stretch;
+  overflow-x: auto;
+}
+.placa {
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, .45);
+  padding: 4px 12px 6px;
+  display: grid;
+  align-content: center;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.placa .rotulo { font: 600 11px/1.25 var(--fonte-pixel); letter-spacing: .1em; text-transform: uppercase; color: var(--placa-tinta-2); }
+.placa .valor { font: 600 22px/1.05 var(--fonte-pixel); font-variant-numeric: tabular-nums; }
+.placa .valor small { font-size: 14px; color: var(--placa-tinta-2); }
+.placa-fase { grid-template-columns: auto auto; column-gap: 10px; align-items: end; }
+.placa-fase .rotulo { grid-column: 1 / -1; }
+.placa-fase .nome { font: 600 14px/1.2 var(--fonte-pixel); color: var(--ouro); padding-bottom: 2px; }
+.placa-arraial { flex: 1 1 200px; max-width: 340px; }
+.linha-valor { display: flex; align-items: center; gap: 10px; }
+.barra { flex: 1; height: 12px; border: 2px solid var(--placa-borda); background: #2A1A10; }
+.barra > div { height: 100%; background: var(--verde); transition: width .25s ease, background-color .25s; }
+.barra > div.media { background: var(--ouro); }
+.barra > div.baixa { background: var(--perigo); }
+.ritmo { margin-left: auto; display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
+.botao-placa, .velocidades button {
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  color: var(--placa-tinta);
+  font: 600 15px var(--fonte-pixel);
+  padding: 6px 12px;
+}
+.botao-placa:hover:not(:disabled), .velocidades button:hover { border-color: var(--ouro); }
+.botao-placa:disabled { opacity: .45; }
+.velocidades { display: flex; }
+.velocidades button { min-width: 3em; font-variant-numeric: tabular-nums; }
+.velocidades button + button { border-left: 0; }
+.velocidades button[aria-pressed="true"] { background: var(--ouro); color: var(--ouro-tinta); }
+.opcao-vel .velocidades button { font-family: var(--fonte-texto); }
+
+.aviso {
+  position: absolute;
+  left: 50%;
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 66px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(780px, calc(100% - 32px));
+  margin: 0;
+  padding: 6px 14px 7px;
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  font: 16px/1.35 var(--fonte-texto);
+  text-align: center;
+  pointer-events: none;
+}
+.aviso b { color: var(--ouro); font-family: var(--fonte-texto); }
+
+.ferramentas, .habilidades { display: flex; gap: 6px; }
+.ferramenta, .habilidade {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "tecla nome custo" "resumo resumo resumo";
+  align-items: baseline;
+  gap: 2px 8px;
+  width: 15.5em;
+  text-align: left;
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  color: var(--placa-tinta);
+  padding: 7px 10px 8px;
+}
+.ferramenta:hover, .habilidade:hover:not(:disabled) { border-color: var(--ouro); }
+.ferramenta[aria-pressed="true"] { background: var(--ouro); color: var(--ouro-tinta); border-color: var(--ouro-tinta); }
+.ferramenta[aria-pressed="true"] .resumo { color: var(--ouro-tinta); }
+.tecla {
+  grid-area: tecla;
+  display: inline-grid;
+  place-items: center;
+  width: 22px; height: 22px;
+  border: 2px solid currentColor;
+  font: 600 13px var(--fonte-pixel);
+}
+.ferramenta .nome, .habilidade .nome { grid-area: nome; font: 600 16px var(--fonte-pixel); }
+.ferramenta .custo { grid-area: custo; font: 600 16px var(--fonte-pixel); font-variant-numeric: tabular-nums; color: var(--ouro); }
+.ferramenta[aria-pressed="true"] .custo { color: var(--ouro-tinta); }
+.ferramenta .resumo, .habilidade .resumo { grid-area: resumo; font: 13.5px/1.3 var(--fonte-texto); color: var(--placa-tinta-2); }
+.ferramenta.caro .custo { color: var(--perigo); }
+
+.campeao { display: flex; gap: 6px; align-items: stretch; }
+.campeao-topo {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 11em);
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  color: var(--placa-tinta);
+  padding: 6px 10px 6px 6px;
+}
+.campeao-topo:hover { border-color: var(--ouro); }
+.campeao-topo[aria-pressed="true"] { border-color: var(--ouro); box-shadow: inset 0 0 0 2px var(--ouro); }
+.retrato { width: 56px; height: 56px; border: 2px solid var(--placa-borda); background-color: #6B8DB0; background-repeat: no-repeat; image-rendering: pixelated; }
+.campeao-nome { display: grid; gap: 2px; }
+.campeao-nome b { font: 600 15px/1.15 var(--fonte-pixel); }
+.campeao-nome .tecla { width: 20px; height: 20px; font-size: 12px; margin-right: 6px; vertical-align: 1px; }
+.campeao-nome small { font: 13px/1.3 var(--fonte-texto); color: var(--placa-tinta-2); }
+.habilidade { position: relative; grid-template-areas: "tecla nome estado" "resumo resumo resumo"; width: 13.5em; overflow: hidden; }
+.habilidade::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--ouro);
+  transform-origin: left;
+  transform: scaleX(calc(1 - var(--carga, 0)));
+}
+.habilidade .estado { grid-area: estado; font: 600 12px var(--fonte-pixel); color: var(--verde); white-space: nowrap; }
+.habilidade:disabled { opacity: .7; }
+.habilidade:disabled .estado { color: var(--placa-tinta-2); }
+.habilidade.ativa { border-color: var(--ouro); }
+
+.selecao {
+  flex: 1 1 15em;
+  min-width: 14em;
+  background: var(--placa);
+  border: 2px dashed var(--placa-borda);
+  padding: 7px 12px;
+  display: grid;
+  gap: 4px;
+  align-content: center;
+  font: 14px/1.35 var(--fonte-texto);
+  color: var(--placa-tinta-2);
+}
+.selecao.ativa { border-style: solid; color: var(--placa-tinta); }
+.selecao .titulo-sel { font: 600 15px var(--fonte-pixel); color: var(--placa-tinta); }
+.selecao .dados { font-variant-numeric: lining-nums tabular-nums; }
+.selecao button {
+  justify-self: start;
+  background: transparent;
+  border: 2px solid var(--placa-borda);
+  color: var(--placa-tinta);
+  font: 600 13px var(--fonte-pixel);
+  padding: 4px 10px;
+}
+.selecao button:hover { border-color: var(--ouro); }
+
+.iniciar {
+  flex: 0 0 auto;
+  min-width: 9.5em;
+  border: 3px solid var(--ouro-tinta);
+  background: var(--ouro);
+  color: var(--ouro-tinta);
+  font: 600 19px/1.15 var(--fonte-pixel);
+  padding: 10px 16px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
+}
+.iniciar:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 rgba(0, 0, 0, .7); }
+.iniciar:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0, 0, 0, .7); }
+.iniciar:disabled { opacity: .55; box-shadow: none; }
+
+/* ── Resultado da fase, no meio da tela ── */
+.resultado {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100% - 150px);
+  overflow: auto;
+  box-sizing: border-box;
+  background: var(--papel);
+  color: var(--tinta);
+  border: 3px solid var(--ouro-tinta);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+  padding: 18px 20px 20px;
+  display: grid;
+  gap: 10px;
+  font-family: var(--fonte-texto);
+}
+.resultado h2 { margin: 0; font-family: var(--fonte-titulo); font-weight: 400; font-size: 25px; line-height: 1.1; text-wrap: balance; }
+.resultado .lead { margin: 0; font-size: 16.5px; }
+.resultado ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.resultado li::marker { color: var(--barro); }
+.numeros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 2px 0 0; }
+.numeros div { display: grid; border-top: 1px solid var(--fio); padding-top: 4px; }
+.numeros dt { font-family: var(--fonte-rotulo); font-weight: 700; font-size: 13px; letter-spacing: .06em; color: var(--tinta-2); }
+.numeros dd { margin: 0; font-weight: 700; font-size: 20px; font-variant-numeric: lining-nums tabular-nums; }
+.resultado .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.resultado .acoes button {
+  border: 2px solid var(--tinta);
+  background: var(--chao);
+  color: var(--tinta);
+  font: 600 15px var(--fonte-texto);
+  padding: 8px 14px;
+}
+.resultado .acoes button.principal { background: var(--sol); color: var(--sol-tinta); border-color: var(--sol-tinta); }
+
+/* ── História entre as fases ── */
+.historia { position: fixed; inset: 0; z-index: 12; background: var(--noite); color: var(--creme); overflow: auto; }
+.historia-fundo {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 18% 22%, rgba(230, 180, 90, .22), transparent 45%),
+    linear-gradient(transparent 70%, #2B1A14 70.4%, #3A2418 100%),
+    linear-gradient(#1A1424 0%, #3A2430 46%, #7A4630 70%);
+}
+.historia-folha {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding-block: max(40px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.historia-sobre { margin: 0; font-family: var(--fonte-rotulo); font-weight: 700; letter-spacing: .14em; font-size: 15px; color: #E6C77E; }
+.historia-titulo { margin: 0; font-family: var(--fonte-titulo); font-weight: 400; font-size: clamp(36px, 6vw, 64px); line-height: .95; color: var(--creme); text-shadow: 0 3px 0 rgba(0, 0, 0, .55); text-wrap: balance; }
+.historia-texto { display: grid; gap: 12px; }
+.historia-texto p { margin: 0; max-width: 62ch; font-size: clamp(17px, 1.9vw, 20px); line-height: 1.55; color: #EFE4CC; }
+.historia-texto .abertura { font-style: italic; color: #F6D79A; }
+.historia-pe { margin: 4px 0 0; max-width: 62ch; font-size: 14px; color: #BFAF8E; }
+.historia-acoes { margin-top: 6px; }
+.historia-acoes button.principal { background: #DFA823; border-color: #DFA823; color: #211B14; }
+.historia-acoes .contagem { align-self: center; font-family: var(--fonte-rotulo); font-size: 14px; color: #BFAF8E; letter-spacing: .08em; }
+
+@media (max-width: 760px) {
+  .barra-topo { gap: 6px; }
+  .placa { padding: 3px 8px 4px; }
+  .placa .valor { font-size: 17px; }
+  .placa-fase .nome, .campeao-nome small, .ferramenta .resumo, .habilidade .resumo { display: none; }
+  .placa-arraial { flex: 1 1 100%; max-width: none; }
+  .ritmo { margin-left: 0; }
+  .aviso { top: calc(max(10px, env(safe-area-inset-top, 0px)) + 132px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: auto; max-width: none; transform: none; font-size: 13.5px; }
+  .ferramenta, .habilidade { width: auto; min-width: 8.5em; }
+  .campeao-topo { grid-template-columns: 44px auto; }
+  .retrato { width: 44px; height: 44px; }
+  .selecao { min-width: 12em; }
+  .iniciar { min-width: 7em; font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra > div { transition: none; }
+  .iniciar:hover:not(:disabled), .iniciar:active:not(:disabled) { transform: none; }
+}
+</style>
+
+<section class="inicio" id="inicio" aria-label="Menu inicial">
+  <div class="inicio-fundo" aria-hidden="true"></div>
+  <div class="inicio-painel">
+    <div>
+      <p class="inicio-sobre">Sertão da Bahia · 1896–1897</p>
+      <p class="inicio-titulo">Canudos</p>
+    </div>
+    <p class="inicio-sub">A Última Resistência</p>
+
+    <nav class="inicio-menu" id="menu-principal" aria-label="Menu">
+      <button type="button" class="principal" data-menu="continuar" id="bt-continuar" hidden>Continuar</button>
+      <button type="button" data-menu="iniciar" id="bt-iniciar">Iniciar</button>
+      <button type="button" data-menu="ajuda">Como jogar</button>
+      <button type="button" data-menu="config">Configurações</button>
+      <button type="button" data-menu="sair">Sair</button>
+    </nav>
+
+    <div class="inicio-caixa" id="menu-config" hidden>
+      <h2>Configurações</h2>
+      <div class="opcao-vel">
+        <span>Velocidade ao iniciar</span>
+        <div class="velocidades" role="group" aria-label="Velocidade ao iniciar" id="cfg-velocidade">
+          <button type="button" data-vel="1" aria-pressed="true">1×</button>
+          <button type="button" data-vel="2" aria-pressed="false">2×</button>
+          <button type="button" data-vel="3" aria-pressed="false">3×</button>
+        </div>
+      </div>
+      <label class="opcao"><input type="checkbox" id="cfg-alcance"><span>Mostrar sempre o alcance dos atiradores</span><small>Sem isso, o alcance aparece só ao construir ou selecionar.</small></label>
+      <label class="opcao"><input type="checkbox" id="cfg-movimento"><span>Reduzir movimento</span><small>Tira o tremor das barricadas e os números que sobem.</small></label>
+      <label class="opcao"><input type="checkbox" id="cfg-foco"><span>Pausar quando a aba ficar oculta</span><small>Vale só durante o combate.</small></label>
+      <p>As configurações ficam guardadas neste navegador.</p>
+      <div class="inicio-acoes"><button type="button" data-menu="voltar">Voltar</button></div>
+    </div>
+
+    <div class="inicio-caixa ajuda" id="menu-ajuda" hidden>
+      <h2>Como jogar</h2>
+      <ul>
+        <li>A campanha tem <b>quatro fases</b>, uma por expedição contra Belo Monte, com <b>dez ondas</b> cada. Entre as fases aparece o que aconteceu de fato.</li>
+        <li>As tropas seguem a estrada até o arraial. Cada uma que entra tira integridade; com integridade zero, a fase se perde e pode ser tentada de novo.</li>
+        <li><b>Atiradores</b> ficam fora da estrada e alcançam 3,5 casas. <b>Barricadas</b> fecham a estrada: as tropas param para derrubá-las, e é ali que convém ter atiradores por perto.</li>
+        <li><b>Antônio Conselheiro</b> não luta, e as tropas não o atacam. Clique nele e depois numa casa livre: ele vai andando até lá, contornando pedras e mato. Parado, faz os atiradores próximos atirarem mais rápido; andando, não. <b>Mutirão</b> conserta barricadas e termina obras; <b>Prédica</b> deixa as barricadas próximas mais firmes.</li>
+        <li>Inimigos novos aparecem ao longo da campanha: <b>batedores</b> (rápidos e frágeis), <b>sapadores</b> (lentos, derrubam barricada depressa) e <b>oficiais</b> (quem marcha perto deles leva menos dano). São tipos de jogo, não reconstrução histórica.</li>
+        <li>Na preparação o tempo da batalha fica parado. No combate dá para construir, mas a obra leva alguns segundos.</li>
+      </ul>
+      <h3>Atalhos</h3>
+      <p><kbd>1</kbd> e <kbd>2</kbd> escolhem a obra, <kbd>3</kbd> seleciona o Conselheiro, <kbd>Q</kbd> e <kbd>W</kbd> usam as habilidades, <kbd>Espaço</kbd> inicia a onda ou pausa, <kbd>Del</kbd> desmonta, <kbd>C</kbd> mostra a cobertura da estrada, <kbd>Esc</kbd> cancela ou abre o menu. Com o Conselheiro selecionado, o botão direito também manda andar.</p>
+      <h3>A paisagem</h3>
+      <p>É a caatinga na seca. Caatinga quer dizer “mata branca” em tupi: galhos cinza quase sem folha, de catingueira e jurema, cortados pelo verde do juazeiro e da oiticica. Há também umbuzeiros, licurizeiros, favela, macambira, lajedos com xique-xique e coroa-de-frade, e o leito seco do Vaza-Barris com craibeiras em flor.</p>
+      <div class="inicio-acoes"><button type="button" data-menu="voltar">Voltar</button></div>
+    </div>
+
+    <div class="inicio-caixa" id="menu-sair" hidden>
+      <h2>Até a próxima</h2>
+      <p>Para sair, feche esta aba. O navegador não deixa uma página fechar a si mesma; na versão para PC, este botão encerra o jogo.</p>
+      <div class="inicio-acoes"><button type="button" data-menu="voltar">Voltar ao menu</button></div>
+    </div>
+
+    <p class="inicio-versao">Protótipo 0.5 · valores de jogo provisórios, não são dados históricos.</p>
+  </div>
+</section>
+
+<div class="jogo" id="pagina">
+  <canvas id="tela" width="1312" height="888" aria-label="Mapa isométrico do arraial de Belo Monte, com a estrada por onde as tropas chegam"></canvas>
+
+  <header class="barra-topo" aria-label="Situação da defesa">
+    <div class="placa placa-fase">
+      <span class="rotulo">Fase</span>
+      <span class="valor" id="hud-fase">1 <small>de 4</small></span>
+      <span class="nome" id="hud-fase-nome">Uauá</span>
+    </div>
+    <div class="placa">
+      <span class="rotulo">Onda</span>
+      <span class="valor" id="hud-onda">1 <small>de 10</small></span>
+    </div>
+    <div class="placa">
+      <span class="rotulo">Materiais</span>
+      <span class="valor" id="hud-materiais">120</span>
+    </div>
+    <div class="placa">
+      <span class="rotulo" id="hud-tropas-rotulo">A caminho</span>
+      <span class="valor" id="hud-tropas">6</span>
+    </div>
+    <div class="placa placa-arraial">
+      <span class="rotulo">Integridade do arraial</span>
+      <div class="linha-valor">
+        <div class="barra" role="progressbar" aria-label="Integridade do arraial" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="hud-barra"><div style="width:100%"></div></div>
+        <span class="valor" id="hud-integridade">100</span>
+      </div>
+    </div>
+    <div class="ritmo">
+      <div class="velocidades" role="group" aria-label="Velocidade do jogo" id="velocidades">
+        <button type="button" data-vel="1" aria-pressed="true">1×</button>
+        <button type="button" data-vel="2" aria-pressed="false">2×</button>
+        <button type="button" data-vel="3" aria-pressed="false">3×</button>
+      </div>
+      <button type="button" class="botao-placa" id="bt-pausa" disabled>Pausar</button>
+      <button type="button" class="botao-placa" id="bt-menu">Menu</button>
+    </div>
+  </header>
+
+  <p class="aviso" id="aviso" role="status" aria-live="polite">Carregando o mapa…</p>
+
+  <footer class="barra-base" id="comandos" aria-label="Construção e campeão">
+    <div class="ferramentas" role="group" aria-label="Escolher o que construir">
+      <button type="button" class="ferramenta" data-tipo="barricada" aria-pressed="false">
+        <span class="tecla">1</span><span class="nome">Barricada</span><span class="custo">25</span>
+        <span class="resumo">Só na estrada. As tropas param para derrubá-la.</span>
+      </button>
+      <button type="button" class="ferramenta" data-tipo="atiradores" aria-pressed="false">
+        <span class="tecla">2</span><span class="nome">Atiradores</span><span class="custo">60</span>
+        <span class="resumo">Fora da estrada. Atira na tropa mais adiantada.</span>
+      </button>
+    </div>
+    <div class="campeao" aria-label="Campeão">
+      <button type="button" class="campeao-topo" id="bt-campeao" aria-pressed="false">
+        <span class="retrato" id="retrato" aria-hidden="true"></span>
+        <span class="campeao-nome">
+          <b><span class="tecla">3</span>Antônio Conselheiro</b>
+          <small>Não luta. Parado, os atiradores perto dele atiram mais rápido.</small>
+        </span>
+      </button>
+      <div class="habilidades">
+        <button type="button" class="habilidade" data-hab="mutirao">
+          <span class="tecla">Q</span><span class="nome">Mutirão</span><span class="estado">disponível</span>
+          <span class="resumo">Repara barricadas e conclui obras a até 4 casas dele.</span>
+        </button>
+        <button type="button" class="habilidade" data-hab="predica">
+          <span class="tecla">W</span><span class="nome">Prédica</span><span class="estado">só no combate</span>
+          <span class="resumo">Por 8 s, barricadas perto dele perdem integridade pela metade.</span>
+        </button>
+      </div>
+    </div>
+    <div class="selecao" id="selecao"><span class="dica">Clique numa estrutura ou no Conselheiro para ver os dados.</span></div>
+    <button type="button" class="iniciar" id="bt-onda">Iniciar onda 1</button>
+  </footer>
+
+  <section class="resultado" id="resultado" aria-live="polite" hidden></section>
+</div>
+
+<section class="historia" id="historia" aria-label="História da campanha" hidden>
+  <div class="historia-fundo" aria-hidden="true"></div>
+  <article class="historia-folha">
+    <p class="historia-sobre" id="hist-sobre"></p>
+    <h2 class="historia-titulo" id="hist-titulo"></h2>
+    <div class="historia-texto" id="hist-texto"></div>
+    <p class="historia-pe" id="hist-pe"></p>
+    <div class="inicio-acoes historia-acoes" id="hist-acoes"></div>
+  </article>
+</section>
+
+<script src="dados.js"></script>
+<script src="nucleo.js"></script>
+<script src="historia.js"></script>
+<script src="abertura.js"></script>
+<!-- Desenho: pixel art (v0.4 em diante). Com ?estilo=aquarela na URL, volta o desenho em aquarela da v0.3. -->
+<script>document.write('<script src="' + (/[?&]estilo=aquarela/.test(location.search) ? 'render.js' : 'render_pixel.js') + '"><\/script>');</script>
+<script src="ui.js"></script>
