@@ -36,6 +36,8 @@ func configure(enemy_definition: EnemyDefinition, manager: GameManager, sites: A
 func _ready() -> void:
 	add_to_group("enemies")
 	loop = false
+	# Sprites 3/4 ficam em pé; sem isso a PathFollow2D deita o soldado nos trechos verticais.
+	rotates = false
 	_path = get_parent() as Path2D
 	if definition == null or game_manager == null or _path == null or _path.curve == null:
 		push_error("Enemy precisa de definição, GameManager e Path2D pai")
