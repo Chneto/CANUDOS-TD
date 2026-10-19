@@ -30,7 +30,7 @@ script = ExtResource("5_gm_script")
 [node name="EnemyPath" type="Path2D" parent="."]
 curve = SubResource("Curve2D_path")
 
-[node name="WaveManager" type="Node" parent="."]
+[node name="WaveManager" type="Node" parent="." node_paths=PackedStringArray("game_manager", "path_node")]
 script = ExtResource("6_wm_script")
 game_manager = NodePath("../GameManager")
 map_definition = ExtResource("2_map_def")
@@ -40,7 +40,7 @@ enemy_definition = ExtResource("8_enemy_def")
 enemies_in_wave = 6
 spawn_interval_s = 1.0
 
-[node name="PlacementManager" type="Node2D" parent="."]
+[node name="PlacementManager" type="Node2D" parent="." node_paths=PackedStringArray("game_manager")]
 script = ExtResource("9_pm_script")
 map_definition = ExtResource("2_map_def")
 game_manager = NodePath("../GameManager")
