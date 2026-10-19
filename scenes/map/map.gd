@@ -35,6 +35,7 @@ var hover_is_valid: bool = false
 @onready var lbl_materials: Label = $UI/PanelTop/HBox/LabelMaterials
 @onready var lbl_enemies: Label = $UI/PanelTop/HBox/LabelEnemies
 @onready var btn_wave: Button = $UI/PanelTop/HBox/BtnStartWave
+@onready var btn_restart: Button = $UI/PanelTop/HBox/BtnRestart
 @onready var btn_sniper: Button = $UI/PanelBottom/HBox/BtnBuildSniper
 @onready var btn_barricade: Button = $UI/PanelBottom/HBox/BtnBuildBarricade
 @onready var lbl_status: Label = $UI/PanelBottom/HBox/LabelStatus
@@ -54,6 +55,7 @@ func _ready() -> void:
 
 	# Wire UI Buttons
 	btn_wave.pressed.connect(_on_start_wave_pressed)
+	btn_restart.pressed.connect(_on_restart_pressed)
 	btn_sniper.pressed.connect(_on_select_sniper_pressed)
 	btn_barricade.pressed.connect(_on_select_barricade_pressed)
 
@@ -184,6 +186,8 @@ func _update_hud() -> void:
 			lbl_phase.modulate = Color(1.0, 0.2, 0.2)
 			btn_wave.disabled = true
 
+	btn_restart.visible = game_manager.phase == GameManager.Phase.VICTORY or game_manager.phase == GameManager.Phase.DEFEAT
+
 
 func _on_start_wave_pressed() -> void:
 	active_build_definition = null
@@ -191,6 +195,13 @@ func _on_start_wave_pressed() -> void:
 		lbl_status.text = "Onda iniciada! O Exército Republicano avança pela caatinga."
 	else:
 		lbl_status.text = "Não foi possível iniciar a onda."
+
+
+func _on_restart_pressed() -> void:
+	active_build_definition = null
+	game_manager.reset_run()
+	lbl_status.text = "Nova tentativa. Selecione uma estrutura para construir ou inicie o combate."
+	queue_redraw()
 
 
 func _on_select_sniper_pressed() -> void:

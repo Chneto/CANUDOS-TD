@@ -79,6 +79,11 @@ text = "Inimigos: 0"
 layout_mode = 2
 text = " Iniciar Combate "
 
+[node name="BtnRestart" type="Button" parent="UI/PanelTop/HBox"]
+visible = false
+layout_mode = 2
+text = " Reiniciar "
+
 [node name="PanelBottom" type="PanelContainer" parent="UI"]
 anchors_preset = 12
 anchor_top = 1.0
