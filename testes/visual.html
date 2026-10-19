@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Canudos — teste visual</title>
+<!-- Monta uma cena fixa e desenha com o render_pixel.js, para tirar capturas sem jogar.
+     ?t=segundos de combate simulado · ?zoom=fx,fy,fw,fh mostra um recorte ampliado. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+  body { margin: 0; background: #111; }
+  #tela { display: block; width: 1312px; height: auto; }
+  #lupa { display: block; image-rendering: pixelated; }
+</style>
+<canvas id="tela"></canvas>
+<canvas id="lupa"></canvas>
+<script src="../dados.js"></script>
+<script src="../nucleo.js"></script>
+<script src="../render_pixel.js"></script>
+<script>
+  var q = new URLSearchParams(location.search), T = Number(q.get('t') || 0);
+  var N = CanudosNucleo, R = CanudosRender, D = CANUDOS_DADOS;
+  var jogo = N.criarJogo(D), vis = R.novoVisual();
+  // ?exp=fase (0–3) e ?onda=índice: começa direto naquela onda
+  if (q.get('exp')) jogo.s = N.estadoInicial(D, Number(q.get('exp')));
+  if (q.get('onda')) jogo.s.onda = Number(q.get('onda'));
+  var tela = document.getElementById('tela'), g = tela.getContext('2d');
+  var cena = R.criarCena(jogo, 1);
+  tela.width = cena.P.L; tela.height = cena.P.A;
+  N.construir(jogo, 'barricada', 5, 6);
+  N.construir(jogo, 'atiradores', 7, 6);
+  N.construir(jogo, 'atiradores', 12, 7);
+  N.moverCampeao(jogo, 9, 8);
+  jogo.eventos.length = 0;
+  if (T > 0) {
+    jogo.s.materiais = 999;
+    N.iniciarOnda(jogo);
+    for (var i = 0; i < T * 60; i++) {
+      if (jogo.s.fase !== 'combate') break;
+      N.atualizar(jogo, 1 / 60);
+      jogo.eventos.forEach(function (ev) { R.efeito(vis, ev, cena.P); });
+      jogo.eventos.length = 0;
+      R.avancarEfeitos(vis, 1 / 60);
+    }
+    if (q.get('predica')) N.usarHabilidade(jogo, 'predica');
+  }
+  if (q.get('ferramenta')) { vis.ferramenta = q.get('ferramenta'); vis.hover = { cx: 13, cy: 6 }; }
+  var n = 0;
+  var z = (q.get('zoom') || '').split(',').map(Number);
+  if (z.length === 4) { tela.style.position = 'absolute'; tela.style.left = '-99999px'; }
+  var gasto = 0;
+  function quadro() {
+    var t0 = performance.now();
+    R.desenhar(g, jogo, vis, cena, 1, {});
+    if (n > 4) gasto += performance.now() - t0;
+    if (z.length === 4) {
+      var l = document.getElementById('lupa'), k = Number(q.get('k') || 4), sw = z[2] * tela.width, sh = z[3] * tela.height;
+      l.width = Math.round(sw * k); l.height = Math.round(sh * k);
+      var lg = l.getContext('2d'); lg.imageSmoothingEnabled = false;
+      lg.drawImage(tela, z[0] * tela.width, z[1] * tela.height, sw, sh, 0, 0, sw * k, sh * k);
+    }
+    if (++n < 40) requestAnimationFrame(quadro);
+    else document.title = 'pronto: ' + (gasto / (n - 5)).toFixed(1) + ' ms por quadro, ' + tela.width + ' px';
+  }
+  document.fonts.load('16px "Pixelify Sans"').then(quadro, quadro);
+</script>
