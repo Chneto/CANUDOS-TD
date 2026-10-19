@@ -57,6 +57,10 @@ func _ready() -> void:
 	btn_sniper.pressed.connect(_on_select_sniper_pressed)
 	btn_barricade.pressed.connect(_on_select_barricade_pressed)
 
+	# Nome e custo vêm das definições, para o botão nunca divergir do valor cobrado
+	btn_sniper.text = " %s (%d M) " % [shooter_definition.display_name, shooter_definition.cost_materials]
+	btn_barricade.text = " %s (%d M) " % [barricade_definition.display_name, barricade_definition.cost_materials]
+
 	_update_hud()
 	queue_redraw()
 
@@ -191,13 +195,13 @@ func _on_start_wave_pressed() -> void:
 
 func _on_select_sniper_pressed() -> void:
 	active_build_definition = shooter_definition
-	lbl_status.text = "Modo Construção: Atirador Jagunço (Custo: %d). Clique em um ponto livre ou plataforma de pedra [F]." % active_build_definition.cost_materials
+	lbl_status.text = "Modo Construção: %s (Custo: %d). Clique em um ponto livre ou plataforma de pedra [F]." % [active_build_definition.display_name, active_build_definition.cost_materials]
 	queue_redraw()
 
 
 func _on_select_barricade_pressed() -> void:
 	active_build_definition = barricade_definition
-	lbl_status.text = "Modo Construção: Barricada de Taipa (Custo: %d). Clique nas posições reservadas [B1, B2, B3]." % active_build_definition.cost_materials
+	lbl_status.text = "Modo Construção: %s (Custo: %d). Clique nas posições reservadas [B1, B2, B3]." % [active_build_definition.display_name, active_build_definition.cost_materials]
 	queue_redraw()
 
 

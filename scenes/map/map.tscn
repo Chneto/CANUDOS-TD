@@ -94,11 +94,11 @@ theme_override_constants/separation = 15
 
 [node name="BtnBuildSniper" type="Button" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
-text = " Atirador Jagunço (60 M) "
+text = " Posição de atiradores (60 M) "
 
 [node name="BtnBuildBarricade" type="Button" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
-text = " Barricada de Taipa (40 M) "
+text = " Barricada (25 M) "
 
 [node name="LabelStatus" type="Label" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
