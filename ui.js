@@ -162,44 +162,167 @@
     return s.expedicao > 0 || s.onda > 0 || s.estruturas.length > 0 || s.fase !== 'preparacao';
   }
 
-  // ───────────────────────── Trilha Sonora Sertaneja ─────────────────────────
+  // ───────────────────────── Trilha Sonora Sertaneja e Áudio Tátil ─────────────────────────
   var audioMusica = null;
+  var volumeAtual = 70;
+  var volumeAntesMudo = 70;
   var musicaAtiva = true;
+  var ctxAudio = null;
+
+  function obterAudioCtx() {
+    if (!ctxAudio) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        try { ctxAudio = new AC(); } catch (e) {}
+      }
+    }
+    if (ctxAudio && ctxAudio.state === 'suspended') {
+      ctxAudio.resume().catch(function () {});
+    }
+    return ctxAudio;
+  }
+
+  function tocarSfx(tipo) {
+    if (!musicaAtiva || volumeAtual === 0) return;
+    try {
+      var ctx = obterAudioCtx();
+      if (!ctx) return;
+      var vol = (volumeAtual / 100) * 0.35;
+      var agora = ctx.currentTime;
+      if (tipo === 'tiro') {
+        var len = Math.floor(ctx.sampleRate * 0.1);
+        var b = ctx.createBuffer(1, len, ctx.sampleRate);
+        var d = b.getChannelData(0);
+        for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.022));
+        var src = ctx.createBufferSource();
+        src.buffer = b;
+        var flt = ctx.createBiquadFilter();
+        flt.type = 'bandpass';
+        flt.frequency.setValueAtTime(850, agora);
+        flt.Q.setValueAtTime(1.5, agora);
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(vol * 0.85, agora);
+        g.gain.exponentialRampToValueAtTime(0.001, agora + 0.1);
+        src.connect(flt); flt.connect(g); g.connect(ctx.destination);
+        src.start(agora);
+      } else if (tipo === 'impacto') {
+        var osc = ctx.createOscillator();
+        var g2 = ctx.createGain();
+        osc.frequency.setValueAtTime(150, agora);
+        osc.frequency.exponentialRampToValueAtTime(40, agora + 0.07);
+        g2.gain.setValueAtTime(vol * 0.6, agora);
+        g2.gain.exponentialRampToValueAtTime(0.001, agora + 0.07);
+        osc.connect(g2); g2.connect(ctx.destination);
+        osc.start(agora); osc.stop(agora + 0.07);
+      } else if (tipo === 'construir') {
+        var osc2 = ctx.createOscillator();
+        var g3 = ctx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(329.6, agora);
+        osc2.frequency.setValueAtTime(493.9, agora + 0.06);
+        g3.gain.setValueAtTime(vol * 0.45, agora);
+        g3.gain.exponentialRampToValueAtTime(0.001, agora + 0.16);
+        osc2.connect(g3); g3.connect(ctx.destination);
+        osc2.start(agora); osc2.stop(agora + 0.16);
+      } else if (tipo === 'onda') {
+        var osc3 = ctx.createOscillator();
+        var g4 = ctx.createGain();
+        osc3.type = 'sawtooth';
+        osc3.frequency.setValueAtTime(196, agora);
+        osc3.frequency.linearRampToValueAtTime(261.6, agora + 0.2);
+        osc3.frequency.linearRampToValueAtTime(293.7, agora + 0.4);
+        var flt2 = ctx.createBiquadFilter();
+        flt2.type = 'lowpass';
+        flt2.frequency.setValueAtTime(600, agora);
+        g4.gain.setValueAtTime(0.001, agora);
+        g4.gain.linearRampToValueAtTime(vol * 0.55, agora + 0.06);
+        g4.gain.exponentialRampToValueAtTime(0.001, agora + 0.55);
+        osc3.connect(flt2); flt2.connect(g4); g4.connect(ctx.destination);
+        osc3.start(agora); osc3.stop(agora + 0.55);
+      }
+    } catch (e) {}
+  }
+
+  function carregarVolume() {
+    try {
+      var salvo = localStorage.getItem('canudos.volume');
+      if (salvo !== null) {
+        var n = parseInt(salvo, 10);
+        if (!isNaN(n) && n >= 0 && n <= 100) volumeAtual = n;
+      }
+    } catch (e) {}
+  }
+
+  function salvarVolume() {
+    try { localStorage.setItem('canudos.volume', String(volumeAtual)); } catch (e) {}
+  }
+
+  function aplicarVolume() {
+    if (audioMusica) {
+      audioMusica.volume = volumeAtual / 100;
+      if (volumeAtual === 0 && !audioMusica.paused) {
+        audioMusica.pause();
+      } else if (volumeAtual > 0 && musicaAtiva && audioMusica.paused) {
+        audioMusica.play().catch(function () {});
+      }
+    }
+    var sl = $('slider-volume'), rt = $('rotulo-volume'), bm = $('bt-mudo');
+    if (sl) sl.value = volumeAtual;
+    if (rt) rt.textContent = volumeAtual + '%';
+    if (bm) {
+      if (volumeAtual === 0) bm.textContent = '🔇';
+      else if (volumeAtual < 35) bm.textContent = '🔈';
+      else if (volumeAtual < 70) bm.textContent = '🔉';
+      else bm.textContent = '🔊';
+    }
+  }
+
+  function ajustarVolume(novo) {
+    novo = Math.max(0, Math.min(100, Math.round(novo)));
+    volumeAtual = novo;
+    if (volumeAtual > 0) {
+      volumeAntesMudo = volumeAtual;
+      musicaAtiva = true;
+    }
+    salvarVolume();
+    aplicarVolume();
+    iniciarMusica();
+  }
+
+  function alternarMudo() {
+    if (volumeAtual > 0) {
+      volumeAntesMudo = volumeAtual;
+      ajustarVolume(0);
+    } else {
+      ajustarVolume(volumeAntesMudo || 70);
+    }
+  }
 
   function iniciarMusica() {
-    if (!musicaAtiva) return;
     try {
       if (!audioMusica) {
         audioMusica = new Audio('musica_canudos.wav');
         audioMusica.loop = true;
-        audioMusica.volume = 0.55;
+        carregarVolume();
+        audioMusica.volume = volumeAtual / 100;
       }
-      audioMusica.play().catch(function () {});
-      atualizarBotaoMusica();
+      if (volumeAtual > 0 && musicaAtiva && audioMusica.paused) {
+        audioMusica.play().catch(function () {});
+      }
+      aplicarVolume();
     } catch (e) {}
   }
 
-  function alternarMusica() {
-    musicaAtiva = !musicaAtiva;
-    if (audioMusica) {
-      if (musicaAtiva) {
-        audioMusica.play().catch(function () {});
-      } else {
-        audioMusica.pause();
-      }
-    } else if (musicaAtiva) {
+  function toqueDesbloqueiaAudio() {
+    if (!audioMusica || audioMusica.paused) {
       iniciarMusica();
     }
-    atualizarBotaoMusica();
+    obterAudioCtx();
+    window.removeEventListener('pointerdown', toqueDesbloqueiaAudio);
+    window.removeEventListener('keydown', toqueDesbloqueiaAudio);
   }
-
-  function atualizarBotaoMusica() {
-    var bt = $('bt-musica');
-    if (bt) {
-      bt.textContent = musicaAtiva ? 'Música: Sim' : 'Música: Não';
-      bt.style.borderColor = musicaAtiva ? 'var(--ouro)' : 'var(--placa-borda)';
-    }
-  }
+  window.addEventListener('pointerdown', toqueDesbloqueiaAudio);
+  window.addEventListener('keydown', toqueDesbloqueiaAudio);
 
   function abrirMenu(painel) {
     naTela = 'menu';
@@ -360,6 +483,8 @@
         // um instante para ver a faixa no mapa antes da história
         if (ev.tipo === 'vitoria') setTimeout(function () { if (jogo.s.fase === 'vitoria' && naTela === 'jogo') aoVencerFase(); }, 1800);
       }
+      if (ev.tipo === 'disparo') tocarSfx('tiro');
+      if (ev.tipo === 'ataqueBarricada' || ev.tipo === 'golpe') tocarSfx('impacto');
       if (ev.tipo === 'barricadaCaiu' && vis.selecionada === ev.id) vis.selecionada = null;
     });
     jogo.eventos.length = 0;
@@ -396,6 +521,7 @@
   }
 
   function iniciarOnda() {
+    tocarSfx('onda');
     if (N.iniciarOnda(jogo)) { pausado = false; acumulador = 0; }
   }
 
@@ -413,7 +539,24 @@
 
   function pontoNaTela(ev) {
     var r = tela.getBoundingClientRect();
-    return { x: (ev.clientX - r.left) * cena.P.L / r.width, y: (ev.clientY - r.top) * cena.P.A / r.height };
+    var sx = (ev.clientX - r.left) * cena.P.L / r.width;
+    var sy = (ev.clientY - r.top) * cena.P.A / r.height;
+
+    var rot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : -0.4636476;
+    var zoom = (vis && vis.zoomCamera) || 1.15;
+    var cx = cena.P.L / 2;
+    var cy = cena.P.A / 2;
+
+    var dx = (sx - cx) / zoom;
+    var dy = (sy - cy) / zoom;
+
+    var cos = Math.cos(-rot);
+    var sin = Math.sin(-rot);
+
+    return {
+      x: cx + (dx * cos - dy * sin),
+      y: cy + (dx * sin + dy * cos)
+    };
   }
 
   function mandarAndar(c) {
@@ -422,16 +565,18 @@
   }
 
   function ligarEntrada() {
-    tela.addEventListener('pointermove', function (ev) {
-      if (ev.pointerType !== 'mouse') return;
-      var p = pontoNaTela(ev);
-      vis.hover = R.celulaNaTela(cena, p.x, p.y);
-    });
-    tela.addEventListener('pointerleave', function (ev) {
-      if (ev.pointerType === 'mouse') vis.hover = null;
-    });
-    tela.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+    var arrastandoCamera = false;
+    var camMouseX = 0, camMouseY = 0;
+
     tela.addEventListener('pointerdown', function (ev) {
+      if (ev.button === 1) { // Clique do meio (scroll): rotação livre da câmera 360°
+        ev.preventDefault();
+        arrastandoCamera = true;
+        camMouseX = ev.clientX;
+        camMouseY = ev.clientY;
+        try { tela.setPointerCapture(ev.pointerId); } catch (e) {}
+        return;
+      }
       var p = pontoNaTela(ev), c = R.celulaNaTela(cena, p.x, p.y);
       if (ev.button === 2) {
         if (vis.selecionada === 'campeao' && !vis.ferramenta && !fimDeJogo()) mandarAndar(c);
@@ -448,7 +593,8 @@
           // No toque não há prévia ao passar o dedo: o primeiro toque mostra, o segundo constrói.
           vis.hover = c;
           if (toque && !mesma) return;
-          N.construir(jogo, vis.ferramenta, c.cx, c.cy);
+          var resConst = N.construir(jogo, vis.ferramenta, c.cx, c.cy);
+          if (resConst && resConst.ok) tocarSfx('construir');
           return;
         }
         vis.ferramenta = null;
@@ -481,7 +627,39 @@
     $('bt-campeao').addEventListener('click', selecionarCampeao);
     $('bt-pausa').addEventListener('click', alternarPausa);
     $('bt-menu').addEventListener('click', function () { abrirMenu(); });
-    var btm = $('bt-musica'); if (btm) btm.addEventListener('click', alternarMusica);
+    
+    var btc = $('bt-camera');
+    if (btc) {
+      btc.addEventListener('click', function () {
+        var atual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : -0.4636476;
+        if (Math.abs(atual - (-0.4636476)) < 0.05) {
+          vis.rotacaoCamera = 0;
+          vis.zoomCamera = 1.0;
+          btc.textContent = '🎥 0° Padrão';
+          avisar('Câmera: Isométrica clássica (0°)');
+        } else if (Math.abs(atual) < 0.05) {
+          vis.rotacaoCamera = Math.PI - 0.4636476;
+          vis.zoomCamera = 1.15;
+          btc.textContent = '🎥 180° Invertida';
+          avisar('Câmera: Vista do Arraial (180°)');
+        } else {
+          vis.rotacaoCamera = -0.4636476;
+          vis.zoomCamera = 1.15;
+          btc.textContent = '🎥 Alinhada';
+          avisar('Câmera: Alinhada perpendicular à marcha (-26,5°)');
+        }
+      });
+    }
+
+    var slv = $('slider-volume');
+    if (slv) {
+      slv.addEventListener('input', function () {
+        ajustarVolume(Number(slv.value));
+      });
+    }
+    var btm = $('bt-mudo');
+    if (btm) btm.addEventListener('click', alternarMudo);
+
     $('bt-onda').addEventListener('click', iniciarOnda);
     $('selecao').addEventListener('click', function (ev) {
       if (ev.target.closest('[data-acao="desmontar"]')) desmontarSelecionada();
@@ -540,7 +718,19 @@
         return;
       }
       if (ev.target.closest && ev.target.closest('input, select, textarea')) return;
-      if (k === '1') escolherFerramenta('barricada');
+      if (k === 'r' || k === 'R') {
+        if (ev.shiftKey) {
+          vis.rotacaoCamera = 0;
+          vis.zoomCamera = 1.0;
+          var btc2 = $('bt-camera'); if (btc2) btc2.textContent = '🎥 0°';
+          avisar('Câmera: Isométrica clássica (0°)');
+        } else {
+          vis.rotacaoCamera = -0.4636476;
+          vis.zoomCamera = 1.15;
+          var btc2 = $('bt-camera'); if (btc2) btc2.textContent = '🎥 Alinhada';
+          avisar('Câmera: Alinhada perpendicular à marcha (-26,5°)');
+        }
+      } else if (k === '1') escolherFerramenta('barricada');
       else if (k === '2') escolherFerramenta('atiradores');
       else if (k === '3') selecionarCampeao();
       else if (k === 'q' || k === 'Q') usarHabilidade('mutirao');

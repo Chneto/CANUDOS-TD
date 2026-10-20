@@ -611,6 +611,10 @@
     R_(3 + L, 6 + u, 1, 6, T[4]);
     R_(8 + L, 6 + u, 1, 6, T[1]);
     R_(3 + L, 11 + u, 6, 1, PAL.couro[2]);
+    if (tipo === 'infantaria' && !costas) {
+      P_(4 + L, 7 + u, PAL.branco[4]); P_(5 + L, 8 + u, PAL.branco[4]);
+      P_(6 + L, 9 + u, PAL.branco[3]); P_(7 + L, 10 + u, PAL.branco[3]);
+    }
     var botao = tipo === 'oficial' ? PAL.ouro[3] : PAL.metal[3];
     if (!costas) { P_(6 + L, 8 + u, botao); P_(6 + L, 10 + u, tipo === 'oficial' ? PAL.ouro[2] : PAL.metal[2]); }
     else if (tipo === 'infantaria' || tipo === 'sapador') { R_(3 + L, 7 + u, 5, 4, PAL.couro[3]); R_(3 + L, 7 + u, 5, 1, PAL.couro[4]); R_(7 + L, 7 + u, 1, 4, PAL.couro[2]); }
@@ -642,6 +646,9 @@
       } else {
         px.linha(ox + 10, oy + 12 + u, ox + 11, oy + 1 + u, armaCor);
         px.linha(ox + 11, oy + u, ox + 11, oy - 3 + u, PAL.metal[3]);
+        if (tipo === 'infantaria') {
+          px.linha(ox + 11, oy + u - 4, ox + 11, oy + u - 8, PAL.metal[4]);
+        }
       }
     } else {
       R_(8 + L, 8, 3, 2, T[3]); P_(11 + L, 9, PAL.pele[4]);
@@ -694,6 +701,11 @@
     // cordão
     R_(4, 14 + u, 5, 1, PAL.algodao[4]);
     P_(7, 15 + u, PAL.algodao[3]); P_(7, 16 + u, PAL.algodao[3]); P_(8, 17 + u, PAL.algodao[2]);
+    if (!costas) {
+      P_(6, 12 + u, PAL.madeira[5]);
+      R_(5, 13 + u, 3, 1, PAL.madeira[4]);
+      P_(6, 14 + u, PAL.madeira[5]);
+    }
     // cabeça
     if (!costas) {
       R_(4, 0 + u, 4, 1, B[3]); R_(3, 1 + u, 2, 7, B[2]); P_(3, 8 + u, B[1]);   // cabelo caindo atrás
@@ -729,6 +741,7 @@
     function R_(x, y, w, h, c) { px.ret(ox + x, oy + y, w, h, c); }
     R_(2, 6, 6, 6, PAL.algodao[4]); R_(2, 6, 1, 6, PAL.algodao[5]); R_(7, 6, 1, 6, PAL.algodao[2]);
     R_(3, 7, 1, 5, PAL.couro[3]); R_(6, 7, 1, 5, PAL.couro[2]);
+    P_(3, 7, PAL.couro[1]); P_(4, 8, PAL.couro[1]); P_(5, 9, PAL.couro[0]); P_(6, 10, PAL.couro[1]);
     R_(2, 12, 6, 2, PAL.algodao[1]);
     if (!costas) { R_(3, 3, 4, 3, PAL.pele[4]); R_(3, 3, 1, 3, PAL.pele[5]); P_(5, 4, PAL.pele[0]); P_(6, 5, PAL.pele[2]); }
     else R_(3, 3, 4, 3, PAL.pele[2]);
@@ -1294,7 +1307,22 @@
       nuvens: [0, 1, 2].map(function (k) { return { x: r() * P.aL, y: HORIZONTE + 60 + r() * (P.aA - HORIZONTE - 100), v: 2.5 + r() * 1.5 }; }),
       nuvensCeu: [0, 1, 2].map(function (k) { return { x: r() * P.aL, y: 6 + r() * 10, v: 1 + r() * 1.2 }; }),
       carcara: { a: r() * TAU, cx: P.aL * 0.5, cy: P.aA * 0.5, rx: 170, ry: 70 },
-      revoada: null, proxRevoada: 10 + r() * 15, redemoinho: null, proxRedemoinho: 14 + r() * 20, centelhas: []
+      revoada: null, proxRevoada: 10 + r() * 15, redemoinho: null, proxRedemoinho: 14 + r() * 20, centelhas: [],
+      poeira: (function () {
+        var p = [];
+        for (var pi = 0; pi < 28; pi++) {
+          p.push({
+            x: r() * P.aL,
+            y: HORIZONTE + 10 + r() * (P.aA - HORIZONTE - 20),
+            vx: 8 + r() * 14,
+            vy: 1.5 + r() * 3,
+            tam: r() < 0.25 ? 2 : 1,
+            cor: r() < 0.4 ? '#c9922c' : r() < 0.7 ? '#dbbc9a' : '#a87e5c',
+            fase: r() * TAU
+          });
+        }
+        return p;
+      })()
     };
   }
 
@@ -1340,6 +1368,14 @@
     A.nuvens.forEach(function (n) { n.x += n.v * dt; n.y += n.v * 0.3 * dt; if (n.x > P.aL + 80) { n.x = -80; n.y = HORIZONTE + 60 + r() * (P.aA - HORIZONTE - 100); } });
     A.nuvensCeu.forEach(function (n) { n.x += n.v * dt; if (n.x > P.aL + 30) { n.x = -30; n.y = 6 + r() * 10; } });
     A.carcara.a += dt * 0.11;
+    if (A.poeira && !calmo) {
+      A.poeira.forEach(function (p) {
+        p.x += p.vx * dt;
+        p.y += (p.vy + Math.sin(A.t * 2.2 + p.fase) * 2) * dt;
+        if (p.x > P.aL + 12) { p.x = -12; p.y = HORIZONTE + 10 + r() * (P.aA - HORIZONTE - 20); }
+        if (p.y > P.aA + 12) p.y = HORIZONTE + 10;
+      });
+    }
     // revoada de avoantes, de vez em quando
     A.proxRevoada -= dt;
     if (!A.revoada && A.proxRevoada <= 0) {
@@ -1434,7 +1470,8 @@
     return {
       ferramenta: null, hover: null, selecionada: null, mostrarCobertura: false, sempreAlcance: false,
       fx: [], recuo: {}, tremor: {}, angulos: {}, flashArraial: 0, recusa: null,
-      menosMovimentoSistema: sistema, menosMovimento: sistema, odo: {}
+      menosMovimentoSistema: sistema, menosMovimento: sistema, odo: {},
+      rotacaoCamera: -0.4636476, zoomCamera: 1.15
     };
   }
 
@@ -1936,17 +1973,39 @@
       pintar(b, m, ab.d, A.revoada.x + av.dx, A.revoada.y + av.dy + Math.sin(t * 2 + i) * 1.5);
     });
 
+    // Poeira e cinzas da Caatinga no vento quente
+    if (A.poeira && !calmo) {
+      b.save();
+      A.poeira.forEach(function (p) {
+        b.fillStyle = p.cor;
+        b.globalAlpha = 0.4 + Math.sin(t * 3 + p.fase) * 0.22;
+        b.fillRect(Math.round(p.x * m), Math.round(p.y * m), p.tam * m, p.tam * m);
+      });
+      b.restore();
+    }
+
     if (fim || (opc && opc.pausado)) { b.fillStyle = 'rgba(29,18,12,.32)'; b.fillRect(0, 0, W, H); }
 
-    // ── para a tela: redução suave de uma escala inteira ──
+    // ── para a tela: redução suave de uma escala inteira com rotação e alinhamento de câmera ──
+    var rot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : -0.4636476;
+    var zoom = (vis && vis.zoomCamera) || 1.15;
+
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = 'high';
-    g.drawImage(B.cv, 0, 0, tela.width, tela.height);
 
-    // ── textos, em px lógicos ──
+    g.save();
     var k2 = tela.width / P.L;
-    g.setTransform(k2, 0, 0, k2, 0, 0);
+    g.scale(k2, k2);
+    var cx = P.L / 2, cy = P.A / 2;
+    g.translate(cx, cy);
+    if (rot !== 0) g.rotate(rot);
+    if (zoom !== 1) g.scale(zoom, zoom);
+    g.translate(-cx, -cy);
+
+    g.drawImage(B.cv, 0, 0, P.L, P.A);
+
+    // ── textos e marcações no mundo ──
     vis.fx.forEach(function (f) {
       if (f.tipo !== 'texto') return;
       var p = f.t / f.dur;
@@ -1960,6 +2019,11 @@
     if (vis.recusa) { var rp2 = P.p(vis.recusa.x, vis.recusa.y, 26); rotulo(g, P, vis.recusa.motivo, rp2.x, rp2.y, '#9a2a18'); }
     textoPixel(g, 'BELO MONTE', pe.x * ESC, pe.y * ESC + 22, 15, '#f6e7c4');
 
+    g.restore();
+
+    // ── faixas centradas na tela física (sem girar) ──
+    var k2Tela = tela.width / P.L;
+    g.setTransform(k2Tela, 0, 0, k2Tela, 0, 0);
     if (s.fase === 'derrota') faixa(g, P, 'O ARRAIAL CAIU');
     else if (s.fase === 'vitoria') faixa(g, P, 'O ARRAIAL RESISTIU');
     else if (opc && opc.pausado) faixa(g, P, 'PAUSADO');
