@@ -15,6 +15,9 @@ const TEX_GROUND := preload("res://assets/sprites/tilesets/tile_ground_caatinga.
 const TEX_ROAD := preload("res://assets/sprites/tilesets/tile_road_dirt.png")
 const TEX_CHURCH := preload("res://assets/sprites/props/objective_church_canudos.png")
 const TEX_CACTUS := preload("res://assets/sprites/props/prop_cactus_mandacaru.png")
+const TEX_LAJEDO := preload("res://assets/sprites/props/prop_rock_lajedo.png")
+const TEX_JUAZEIRO := preload("res://assets/sprites/props/prop_tree_juazeiro.png")
+const TEX_HOUSE := preload("res://assets/sprites/props/prop_house_taipa.png")
 
 # Cactus decorative placement positions (in grid cells)
 const CACTUS_CELLS: Array[Vector2i] = [
@@ -23,6 +26,20 @@ const CACTUS_CELLS: Array[Vector2i] = [
 	Vector2i(7, 9),
 	Vector2i(12, 1),
 	Vector2i(18, 9)
+]
+
+# Juazeiro / Umbuzeiro (Mata Branca)
+const JUAZEIRO_CELLS: Array[Vector2i] = [
+	Vector2i(3, 4),
+	Vector2i(9, 1),
+	Vector2i(2, 9)
+]
+
+# Casebres de Taipa ao redor do Arraial
+const HOUSE_CELLS: Array[Vector2i] = [
+	Vector2i(13, 7),
+	Vector2i(17, 7),
+	Vector2i(18, 5)
 ]
 
 var active_build_definition: StructureDefinition = null
@@ -134,8 +151,9 @@ func _draw() -> void:
 				draw_rect(Rect2(pos, sz), Color(0.9, 0.6, 0.2, 0.25), true)
 				draw_rect(Rect2(pos, sz), Color(0.8, 0.5, 0.1, 0.8), false, 2.0)
 			elif c_type == MapDefinition.CellType.FIXED_SITE:
-				draw_rect(Rect2(pos, sz), Color(0.2, 0.7, 0.9, 0.25), true)
-				draw_rect(Rect2(pos, sz), Color(0.1, 0.6, 0.9, 0.8), false, 2.0)
+				draw_texture_rect(TEX_LAJEDO, Rect2(pos, sz), false)
+				draw_rect(Rect2(pos, sz), Color(0.2, 0.7, 0.9, 0.2), true)
+				draw_rect(Rect2(pos, sz), Color(0.1, 0.6, 0.9, 0.8), false, 1.5)
 			elif c_type == MapDefinition.CellType.SPAWN:
 				draw_rect(Rect2(pos, sz), Color(0.9, 0.2, 0.2, 0.2), true)
 
@@ -147,7 +165,23 @@ func _draw() -> void:
 		)
 		draw_texture_rect(TEX_CACTUS, cactus_rect, false)
 
-	# 3. Desenhar a Igreja de Canudos (Objetivo Principal)
+	# 3. Desenhar árvores de Juazeiro / Umbuzeiro (Mata Branca)
+	for t_pos in JUAZEIRO_CELLS:
+		var tree_rect := Rect2(
+			Vector2((t_pos.x - 0.75) * cell_size, (t_pos.y - 1.5) * cell_size),
+			Vector2(cell_size * 2.5, cell_size * 2.5)
+		)
+		draw_texture_rect(TEX_JUAZEIRO, tree_rect, false)
+
+	# 4. Desenhar Casebres de Taipa (Arraial de Canudos)
+	for h_pos in HOUSE_CELLS:
+		var house_rect := Rect2(
+			Vector2((h_pos.x - 0.5) * cell_size, (h_pos.y - 0.8) * cell_size),
+			Vector2(cell_size * 2.0, cell_size * 1.8)
+		)
+		draw_texture_rect(TEX_HOUSE, house_rect, false)
+
+	# 5. Desenhar a Igreja de Canudos (Objetivo Principal)
 	# Células de (14,9) a (17,10) -> Centro do objetivo
 	var church_pos := Vector2(13.5 * cell_size, 8.0 * cell_size)
 	var church_size := Vector2(cell_size * 4.5, cell_size * 3.5)

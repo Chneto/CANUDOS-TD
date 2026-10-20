@@ -25,6 +25,9 @@
 | T15 | Integrar HUD e feedback visual do MVP | Antigravity | concluída | T10, T11, T12, T13, T14 | HUD flutuante sem oclusão de linhas 0 e 10 (igreja e spawn 100% visíveis), círculo de alcance de atirador, barras de vida em barricadas e igreja. |
 | T16 | Revisar compreensão, tom e legibilidade | Claude | a fazer | T15, T03 | Relatório de teste com problemas priorizados e recomendações. |
 | T17 | Corrigir as falhas da primeira execução na Godot 4.3 | Claude | concluída | T10, T11, T12, T13, T14 | `tests/sim_onda.gd` passa: construir e iniciar a onda funcionam, os três pontos fixos disparam, o soldado não gira, os botões mostram o custo cobrado e o reinício funciona. |
+| T18 | Correção de dimensionamento e sobreposição dos botões / Conselheiro | Antigravity | concluída | T15 | Cartões do HUD inferior redimensionados responsivamente com `clamp()` e `flex: 0 0 auto`, impedindo corte ou sobreposição de Antônio Conselheiro e Mutirão em resoluções de 1024px a 1920px+. Recompilado `Canudos.exe`. |
+| T19 | Cenografia da Caatinga (Frente 2) via FLUX e integração | Antigravity | concluída | T06, T10 | Gerados no FLUX Schnell e recortados com `rembg`: `prop_tree_juazeiro` (Mata Branca), `prop_rock_lajedo` (Pontos F elevados) e `prop_house_taipa` (Arraial de Canudos). Integrados a `scenes/map/map.gd`. |
+| T20 | Criação da Trilha Sonora Nordestina Sertaneja | Antigravity | concluída | — | Síntese acústica autoral em 44.1kHz estéreo (Viola caipira Karplus-Strong, Pífano em modo nordestino, Zabumba e Triângulo). Integrada no Godot (`AudioStreamPlayer`) e no jogo Web/PC com botão de áudio. |
 
 ### Notas da T15 (Antigravity)
 

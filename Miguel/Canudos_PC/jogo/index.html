@@ -231,8 +231,10 @@ kbd {
 .barra-topo { top: 0; padding-top: max(10px, env(safe-area-inset-top, 0px)); flex-wrap: wrap; align-items: stretch; }
 .barra-base {
   bottom: 0;
-  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   align-items: stretch;
+  gap: 6px;
+  box-sizing: border-box;
   overflow-x: auto;
 }
 .placa {
@@ -290,19 +292,21 @@ kbd {
 }
 .aviso b { color: var(--ouro); font-family: var(--fonte-texto); }
 
-.ferramentas, .habilidades { display: flex; gap: 6px; }
-.ferramenta, .habilidade {
+.ferramentas, .habilidades { display: flex; gap: 6px; flex: 0 0 auto; }
+.ferramenta {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: "tecla nome custo" "resumo resumo resumo";
   align-items: baseline;
   gap: 2px 8px;
-  width: 15.5em;
+  width: clamp(10.5em, 11vw, 13.5em);
+  min-width: 0;
   text-align: left;
   background: var(--placa);
   border: 2px solid var(--placa-borda);
   color: var(--placa-tinta);
-  padding: 7px 10px 8px;
+  padding: 6px 8px 7px;
+  box-sizing: border-box;
 }
 .ferramenta:hover, .habilidade:hover:not(:disabled) { border-color: var(--ouro); }
 .ferramenta[aria-pressed="true"] { background: var(--ouro); color: var(--ouro-tinta); border-color: var(--ouro-tinta); }
@@ -315,32 +319,82 @@ kbd {
   border: 2px solid currentColor;
   font: 600 13px var(--fonte-pixel);
 }
-.ferramenta .nome, .habilidade .nome { grid-area: nome; font: 600 16px var(--fonte-pixel); }
-.ferramenta .custo { grid-area: custo; font: 600 16px var(--fonte-pixel); font-variant-numeric: tabular-nums; color: var(--ouro); }
+.ferramenta .nome, .habilidade .nome { grid-area: nome; font: 600 15px var(--fonte-pixel); }
+.ferramenta .custo { grid-area: custo; font: 600 15px var(--fonte-pixel); font-variant-numeric: tabular-nums; color: var(--ouro); }
 .ferramenta[aria-pressed="true"] .custo { color: var(--ouro-tinta); }
-.ferramenta .resumo, .habilidade .resumo { grid-area: resumo; font: 13.5px/1.3 var(--fonte-texto); color: var(--placa-tinta-2); }
+.ferramenta .resumo, .habilidade .resumo {
+  grid-area: resumo;
+  font: 12px/1.25 var(--fonte-texto);
+  color: var(--placa-tinta-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .ferramenta.caro .custo { color: var(--perigo); }
 
-.campeao { display: flex; gap: 6px; align-items: stretch; }
+.campeao { display: flex; gap: 6px; align-items: stretch; flex: 0 0 auto; }
 .campeao-topo {
   display: grid;
-  grid-template-columns: 56px minmax(0, 11em);
+  grid-template-columns: 48px 1fr;
   gap: 8px;
   align-items: center;
   text-align: left;
   background: var(--placa);
   border: 2px solid var(--placa-borda);
   color: var(--placa-tinta);
-  padding: 6px 10px 6px 6px;
+  padding: 5px 8px 5px 5px;
+  width: clamp(12.5em, 13vw, 15.5em);
+  min-width: 12em;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .campeao-topo:hover { border-color: var(--ouro); }
 .campeao-topo[aria-pressed="true"] { border-color: var(--ouro); box-shadow: inset 0 0 0 2px var(--ouro); }
-.retrato { width: 56px; height: 56px; border: 2px solid var(--placa-borda); background-color: #6B8DB0; background-repeat: no-repeat; image-rendering: pixelated; }
-.campeao-nome { display: grid; gap: 2px; }
-.campeao-nome b { font: 600 15px/1.15 var(--fonte-pixel); }
-.campeao-nome .tecla { width: 20px; height: 20px; font-size: 12px; margin-right: 6px; vertical-align: 1px; }
-.campeao-nome small { font: 13px/1.3 var(--fonte-texto); color: var(--placa-tinta-2); }
-.habilidade { position: relative; grid-template-areas: "tecla nome estado" "resumo resumo resumo"; width: 13.5em; overflow: hidden; }
+.retrato {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 2px solid var(--placa-borda);
+  background-color: #6B8DB0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.campeao-nome { display: grid; gap: 2px; min-width: 0; overflow: hidden; }
+.campeao-nome b {
+  font: 600 14.5px/1.15 var(--fonte-pixel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.campeao-nome .tecla { width: 18px; height: 18px; font-size: 11px; margin-right: 5px; vertical-align: 1px; }
+.campeao-nome small {
+  font: 11.5px/1.2 var(--fonte-texto);
+  color: var(--placa-tinta-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.habilidade {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "tecla nome estado" "resumo resumo resumo";
+  align-items: baseline;
+  gap: 2px 8px;
+  width: clamp(9.5em, 10vw, 12em);
+  min-width: 0;
+  text-align: left;
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  color: var(--placa-tinta);
+  padding: 6px 8px 7px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
 .habilidade::before {
   content: "";
   position: absolute;
@@ -356,39 +410,44 @@ kbd {
 .habilidade.ativa { border-color: var(--ouro); }
 
 .selecao {
-  flex: 1 1 15em;
-  min-width: 14em;
+  flex: 1 1 8em;
+  min-width: 7em;
+  max-width: 15em;
   background: var(--placa);
   border: 2px dashed var(--placa-borda);
-  padding: 7px 12px;
+  padding: 6px 10px;
   display: grid;
   gap: 4px;
   align-content: center;
-  font: 14px/1.35 var(--fonte-texto);
+  font: 12.5px/1.3 var(--fonte-texto);
   color: var(--placa-tinta-2);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .selecao.ativa { border-style: solid; color: var(--placa-tinta); }
-.selecao .titulo-sel { font: 600 15px var(--fonte-pixel); color: var(--placa-tinta); }
+.selecao .titulo-sel { font: 600 14px var(--fonte-pixel); color: var(--placa-tinta); }
 .selecao .dados { font-variant-numeric: lining-nums tabular-nums; }
 .selecao button {
   justify-self: start;
   background: transparent;
   border: 2px solid var(--placa-borda);
   color: var(--placa-tinta);
-  font: 600 13px var(--fonte-pixel);
-  padding: 4px 10px;
+  font: 600 12px var(--fonte-pixel);
+  padding: 3px 8px;
 }
 .selecao button:hover { border-color: var(--ouro); }
 
 .iniciar {
   flex: 0 0 auto;
-  min-width: 9.5em;
+  min-width: 8em;
   border: 3px solid var(--ouro-tinta);
   background: var(--ouro);
   color: var(--ouro-tinta);
-  font: 600 19px/1.15 var(--fonte-pixel);
-  padding: 10px 16px;
+  font: 600 17px/1.15 var(--fonte-pixel);
+  padding: 8px 14px;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 .iniciar:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 rgba(0, 0, 0, .7); }
 .iniciar:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0, 0, 0, .7); }
@@ -464,6 +523,18 @@ kbd {
 .historia-acoes { margin-top: 6px; }
 .historia-acoes button.principal { background: #DFA823; border-color: #DFA823; color: #211B14; }
 .historia-acoes .contagem { align-self: center; font-family: var(--fonte-rotulo); font-size: 14px; color: #BFAF8E; letter-spacing: .08em; }
+
+@media (max-width: 1150px) {
+  .barra-base { gap: 4px; padding-left: 8px; padding-right: 8px; }
+  .ferramenta { width: 9.5em; padding: 4px 6px; }
+  .campeao-topo { width: 11em; min-width: 9.5em; padding: 4px 6px; grid-template-columns: 36px 1fr; }
+  .retrato { width: 36px; height: 36px; }
+  .campeao-nome small { display: none; }
+  .habilidade { width: 8.5em; padding: 4px 6px; }
+  .ferramenta .resumo, .habilidade .resumo { display: none; }
+  .selecao { min-width: 6em; max-width: 9em; font-size: 11px; padding: 4px 8px; }
+  .iniciar { min-width: 7em; font-size: 15px; padding: 6px 10px; }
+}
 
 @media (max-width: 760px) {
   .barra-topo { gap: 6px; }
@@ -581,6 +652,7 @@ kbd {
         <button type="button" data-vel="3" aria-pressed="false">3×</button>
       </div>
       <button type="button" class="botao-placa" id="bt-pausa" disabled>Pausar</button>
+      <button type="button" class="botao-placa" id="bt-musica" title="Música sertaneja">Música: Sim</button>
       <button type="button" class="botao-placa" id="bt-menu">Menu</button>
     </div>
   </header>

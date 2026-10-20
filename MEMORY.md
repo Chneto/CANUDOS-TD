@@ -43,6 +43,28 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - `resources/definitions/enemy_basic.tres`
   - `resources/maps/canudos_mvp.tres`
 
+### 1.6 Sobreposição dos Botões da Barra Inferior e Corte do Conselheiro (T18 — Resolvido)
+* **Sintoma:** Em resoluções padrão (1280x720, 1366x768 ou 1080p com escala), o botão de Antônio Conselheiro era esmagado por `flex-shrink: 1` e `minmax(0, 11em)`, reduzindo sua área de texto a ~7px enquanto seu texto transbordava, ficando encoberto pelo botão `[Q] Mutirão`.
+* **Causa Raiz:** Ausência de `flex: 0 0 auto` / `min-width` no cartão do campeão, somada à largura fixa excessiva (`15.5em`, `13.5em`) dos demais botões, extrapolando a largura da janela para mais de 1600px.
+* **Solução:**
+  - Aplicação de `width: clamp()` dinâmico nas ferramentas e habilidades.
+  - Bloqueio de esmagamento no campeão com `flex: 0 0 auto; min-width: 12em;` e `white-space: nowrap; text-overflow: ellipsis`.
+  - Adição de breakpoint `@media (max-width: 1150px)` para recolhimento elegante das descrições longas em telas compactas.
+  - Sincronização em `Miguel/Canudos/index.html`, `Miguel/Canudos_PC/jogo/index.html` e recompilação de `Canudos.exe`.
+
+### 1.7 Frente 2 — Cenografia da Caatinga e Novos Props via FLUX (T19 — Resolvido)
+* **Objetivo:** Superar a limitação de um cenário mono-cacto na Godot 4.3, integrando a rica botânica e geomorfologia da Caatinga sertaneja.
+* **Execução:**
+  - `prop_tree_juazeiro`: Juazeiro / Umbuzeiro de mata branca, galhos retorcidos e folhagem prateada.
+  - `prop_rock_lajedo`: Lajedo de pedra granítica avermelhada, inserido como base dos pontos fixos elevados `[F]`.
+  - `prop_house_taipa`: Casebres de pau-a-pique e taipa de mão com telhas coloniais compondo o Arraial ao redor da Igreja.
+  - Pipeline executado no FLUX Schnell com `rembg` automático e integrado a `scenes/map/map.gd`.
+
+### 1.8 Trilha Sonora Regional Nordestina (T20 — Resolvido)
+* **Sonoridade Autêntica:** Síntese autoral em 44.1kHz estéreo 16-bit com física acústica Karplus-Strong para Viola Caipira, oscilador de sopro com harmônicos ímpares para Pífano/Flauta de taboca em Modo Nordestino (Mixolídio/Lídio), Zabumba grave de procissão e Triângulo metálico sincopado.
+* **Loop Seamless:** Duração de 42,7 segundos com fade cruzado para repetição contínua.
+* **Integração:** Adicionado `AudioStreamPlayer` em `scenes/map/map.tscn` (Godot 4.3) e botão `#bt-musica` com áudio HTML5 nos protótipos Web e PC.
+
 ---
 
 ## 2. Padrões de Verificação Rápida

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scenes/map/map.gd" id="1_map_script"]
 [ext_resource type="Resource" path="res://resources/maps/canudos_mvp.tres" id="2_map_def"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/systems/placement_manager.gd" id="9_pm_script"]
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_sniper.tscn" id="10_sniper_scene"]
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_barricade.tscn" id="11_barricade_scene"]
+[ext_resource type="AudioStream" path="res://assets/audio/music_caatinga_resistencia.wav" id="12_bgm"]
 
 [sub_resource type="Curve2D" id="Curve2D_path"]
 _data = {
@@ -147,3 +148,9 @@ text = " Barricada (25 M) "
 [node name="LabelStatus" type="Label" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
 text = "Selecione uma estrutura para construir ou inicie o combate."
+
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_bgm")
+autoplay = true
+volume_db = -5.0

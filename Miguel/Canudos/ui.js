@@ -162,6 +162,45 @@
     return s.expedicao > 0 || s.onda > 0 || s.estruturas.length > 0 || s.fase !== 'preparacao';
   }
 
+  // ───────────────────────── Trilha Sonora Sertaneja ─────────────────────────
+  var audioMusica = null;
+  var musicaAtiva = true;
+
+  function iniciarMusica() {
+    if (!musicaAtiva) return;
+    try {
+      if (!audioMusica) {
+        audioMusica = new Audio('musica_canudos.wav');
+        audioMusica.loop = true;
+        audioMusica.volume = 0.55;
+      }
+      audioMusica.play().catch(function () {});
+      atualizarBotaoMusica();
+    } catch (e) {}
+  }
+
+  function alternarMusica() {
+    musicaAtiva = !musicaAtiva;
+    if (audioMusica) {
+      if (musicaAtiva) {
+        audioMusica.play().catch(function () {});
+      } else {
+        audioMusica.pause();
+      }
+    } else if (musicaAtiva) {
+      iniciarMusica();
+    }
+    atualizarBotaoMusica();
+  }
+
+  function atualizarBotaoMusica() {
+    var bt = $('bt-musica');
+    if (bt) {
+      bt.textContent = musicaAtiva ? 'Música: Sim' : 'Música: Não';
+      bt.style.borderColor = musicaAtiva ? 'var(--ouro)' : 'var(--placa-borda)';
+    }
+  }
+
   function abrirMenu(painel) {
     naTela = 'menu';
     if (jogo.s.fase === 'combate' && !pausado) { pausado = true; pausaDoMenu = true; }
@@ -442,6 +481,7 @@
     $('bt-campeao').addEventListener('click', selecionarCampeao);
     $('bt-pausa').addEventListener('click', alternarPausa);
     $('bt-menu').addEventListener('click', function () { abrirMenu(); });
+    var btm = $('bt-musica'); if (btm) btm.addEventListener('click', alternarMusica);
     $('bt-onda').addEventListener('click', iniciarOnda);
     $('selecao').addEventListener('click', function (ev) {
       if (ev.target.closest('[data-acao="desmontar"]')) desmontarSelecionada();
