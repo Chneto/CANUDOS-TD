@@ -1,11 +1,32 @@
 # CANUDOS TD — Canudos: A Última Resistência
 
+[![Jogar no Navegador (GitHub Pages)](https://img.shields.io/badge/🎮%20JOGAR%20ONLINE-GitHub%20Pages-brightgreen?style=for-the-badge&logo=github)](https://chneto.github.io/CANUDOS-TD/)
 [![Engine: Godot 4.x](https://img.shields.io/badge/Engine-Godot%204.x-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org/)
 [![Genre: Tower Defense](https://img.shields.io/badge/Gênero-Tower%20Defense%202D-orange)](#)
 [![Theme: Guerra de Canudos](https://img.shields.io/badge/Tema-História%20do%20Brasil%20(1896--1897)-darkred)](#)
 [![Collaboration: Antigravity + Codex + Claude](https://img.shields.io/badge/Desenvolvimento-Multi--Agente%20Colaborativo-blueviolet)](#)
 
-> **Canudos: A Última Resistência** é um jogo indie de *Tower Defense* 2D em visão Top-Down 3/4, para PC. O jogador organiza a defesa do arraial de Belo Monte contra as expedições militares da jovem República, administrando recursos escassos, posicionando posições de atiradores e barricadas de taipa na caatinga baiana do final do século XIX.
+> **Canudos: A Última Resistência** é um jogo indie de *Tower Defense* 2D em visão tática de profundidade, para Web e PC. O jogador organiza a defesa do arraial de Belo Monte contra as expedições militares da jovem República, administrando recursos escassos, posicionando atiradores jagunços e barricadas de taipa na caatinga baiana do final do século XIX.
+
+---
+
+## 🎮 Jogue Agora Online
+
+O jogo completo com motor gráfico em pixel art, trilha sonora sertaneja autoral, campeão Antônio Conselheiro e câmera tática de profundidade está publicado e pronto para jogar diretamente no navegador:
+
+👉 **[https://chneto.github.io/CANUDOS-TD/](https://chneto.github.io/CANUDOS-TD/)**
+
+### Controles Principais
+| Ação | Teclado / Mouse |
+|---|---|
+| **Rotacionar Câmera (Órbita)** | Arrasto com **Botão do Meio do Mouse** (Horizontal) ou teclas `R` / `Shift+R` |
+| **Inclinação de Profundidade (Pitch 20° a 75°)** | Arrasto com **Botão do Meio do Mouse** (Vertical) ou teclas `T` (Planta) / `Y` (Rasante) |
+| **Zoom Contínuo (68% a 230%)** | **Roda do Mouse** ou teclas `+` / `-` / `PageUp` / `PageDown` |
+| **Mover / Pan da Câmera** | Arrasto com **Botão Direito do Mouse** ou teclas `W`, `A`, `S`, `D` / Setas |
+| **Enquadramento Rápido** | Botões de setor no HUD: `[📍 Geral]`, `[1. Entrada]`, `[2. Reta Central]`, `[3. Igreja]` |
+| **Construir / Posicionar** | Clique nas posições destacadas no mapa após selecionar no HUD |
+| **Habilidades de Conselheiro** | Teclas `[Q]` (Prédica / Resistência) e `[W]` (Mutirão / Reparos) |
+| **Ajuste de Volume** | Slider contínuo de 0 a 100% no canto superior direito |
 
 ---
 
@@ -33,24 +54,20 @@ O projeto é desenvolvido em sinergia por três agentes especializados com papé
 
 ---
 
-## 🗺️ Estado Atual e O Que Foi Feito
+## 🗺️ Estado Atual e Entregas Concluídas
 
-- [x] **Definição da Engine:** Godot 4.x com GDScript formalizada como engine oficial (`DEC-001` / `T01`).
-- [x] **Regra das Barricadas:** Barricadas alocadas em posições adjacentes reservadas na rota (`DEC-003`).
-- [x] **Direção Visual Consolidada:** Perspectiva 2D Top-Down 3/4 (`DEC-004`).
-- [x] **Especificação do Mapa MVP:** Viewport 1280x720 com grid ortogonal 20x11 de 64x64 px e 7 waypoints fixos (`docs/specs/map-mvp-specification.md` / `T02`).
-- [x] **Pipeline de IA Visual:** FLUX.1 Schnell local configurado + scripts automatizados de geração e extração de alfa (`tools/flux_generator.py` e `tools/process_sprites.py`).
-
----
-
-## 🚀 Próximas Etapas (Marco 1 — Ciclo Jogável)
-
-- [ ] **T03 (Claude):** Guia histórico mínimo distinguindo fatos e ficção em `docs/research/mvp-historical-guide.md`.
-- [ ] **T04 (Codex):** Contratos formais de dados para unidades, torres, barricadas e rota em `docs/specs/mvp-data-contracts.md`.
-- [ ] **T10 (Antigravity):** Construção da cena base do mapa (`BattleMap.tscn`) com TileMapLayer e nós Path2D no Godot.
-- [ ] **T11, T12, T13, T14 (Codex):** Lógica funcional de inimigos percorrendo a rota, atiradores atacando e barricadas recebendo dano.
-- [ ] **T15 (Antigravity):** Integração do HUD com tema de madeira e couro para visualização de materiais e vida.
-- [ ] **T16 (Claude):** Revisão de tom, clareza e legibilidade tática da primeira build.
+- [x] **Marco 0 (Fundação e Contratos):** Definição da Engine Godot 4.3 (`T01`), Mapa MVP (`T02`), Guia Histórico (`T03`), Contratos de Dados (`T04`), Posições de Barricada (`T05`), Geração e Recorte de Sprites (`T06`).
+- [x] **Marco 1 (Ciclo Jogável e Polimento Técnico):** Cena do Mapa (`T10`), Ciclo de Jogo/Integridade (`T11`), Inimigos da 4ª Expedição (`T12`), Atiradores Jagunços (`T13`), Barricadas de Taipa (`T14`), HUD Dinâmico e Responsivo (`T15`, `T18`), Auditoria de Tom (`T16`), Execução Verde na Godot 4.3 (`T17`).
+- [x] **Frente 2 (Cenografia, Áudio e Câmera Avançada):**
+  - **Cenografia da Caatinga (`T19`):** Juazeiros, Lajedos e Casas de Taipa integrados.
+  - **Trilha Sonora Nordestina e SFX (`T20`, `T23`, `T24`):** Viola sertaneja Karplus-Strong, pífano, zabumba e 7 SFX táteis.
+  - **Barra de Volume Contínua (`T21`):** Slider interativo de 0 a 100% com persistência.
+  - **Campeão Antônio Conselheiro (`T22`):** Aura tática, habilidades Prédica (`[Q]`) e Mutirão (`[W]`).
+  - **Arte Canônica de Capa (`T25`):** Crepúsculo no arraial de Belo Monte e Igreja de Bom Jesus.
+  - **Câmera Orbital em Funil e Prévia Tática (`T26`):** Arco de órbita sem inversão, indicador de alcance 220px e ghost preview em tempo real.
+  - **Overscan Circular, Sprites 4 Ângulos e Foco Tático (`T27`):** Buffer circunscrito sem corte nos cantos, 4 perspectivas cardeais de tropas e foco rápido por retas.
+  - **Inclinação Vertical de Profundidade (Pitch 20° a 75°) e Zoom Contínuo (`T28`):** Rotação rasante ou topo zênite, zoom suave e matriz inversa precisa.
+  - **Publicação no GitHub Pages e Automação CI/CD (`T29`):** Deploy automático via GitHub Actions e branch `gh-pages`.
 
 ---
 

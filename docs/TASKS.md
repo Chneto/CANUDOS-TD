@@ -36,6 +36,7 @@
 | T26 | Câmera Orbital em Funil sem Inversão e Prévia Tática com Alcance | Antigravity / Codex | concluída | T21, T24 | Arco de rotação orbital limitado a [-36°, +36°] com zoom dinâmico de funil (0.85x a 1.75x) impedindo inversão de cabeça para baixo; círculo de alcance de 220px e sprite fantasma translúcido de atiradores e barricadas em tempo real durante hover. |
 | T27 | Overscan Circular, Sprites Direcionais 4 Ângulos e Foco Tático por Retas | Antigravity / Codex | concluída | T21, T26 | Eliminação de cantos cortados no giro via buffer circunscrito com overscan (MARGEM 240, BASE 480) e Caatinga contínua; Sprites direcionais em 4 ângulos cardeais (Frente/Sul, Perfil/Leste-Oeste, Costas/Norte) dinâmicos conforme rotação de câmera e vetor de marcha; Sistema de pan suave por arrasto com botão direito/WASD e 4 botões de enquadramento rápido no HUD ([Geral], [1. Entrada], [2. Reta Central], [3. Igreja]). |
 | T28 | Inclinação Vertical de Profundidade (Pitch 20° a 75°) e Zoom Contínuo | Antigravity / Codex | concluída | T26, T27 | Controle livre de profundidade da câmera (Pitch de 20° rasante até 75° top-down) via arrasto vertical do botão do meio do mouse; Zoom in / out contínuo (68% a 230%) na roda do mouse; inversão matemática analítica preservando 100% da acurácia de cliques e anéis de alcance em qualquer inclinação. |
+| T29 | Publicação e Automação do Jogo no GitHub Pages | Antigravity | concluída | T28 | Publicação do jogo web no GitHub Pages via branch `gh-pages` e automação CI/CD via workflow `.github/workflows/deploy-pages.yml`. Acesso online em `https://chneto.github.io/CANUDOS-TD/`. |
 
 ### Notas da T15 (Antigravity)
 
@@ -132,6 +133,13 @@
 - **Paridade no Godot 4.3:**
   - `scenes/map/map.gd` atualizado para ajustar `camera_pivot.scale.y` e `camera.zoom` suavemente via arrasto do botão do meio e roda do mouse.
   - Validado via testes automatizados e screenshots do Playwright.
+
+### Notas da T29 (Antigravity)
+
+- **Publicação Web no GitHub Pages (Arquitetura Dual-Resiliente):**
+  - **Canal A (Branch `gh-pages`):** Criada e enviada para o repositório remoto a branch `gh-pages` com o conteúdo integral da aplicação web (`Miguel/Canudos/`) na raiz do branch (`index.html`, `ui.js`, `render_pixel.js`, `nucleo.js`, `dados.js`, `historia.js`, `abertura.js`, `capa.jpg`, `musica_canudos.wav` e pasta de fontes). Isso garante publicação instantânea caso o repositório esteja configurado no modo *Deploy from a branch*.
+  - **Canal B (GitHub Actions CI/CD):** Criado workflow `.github/workflows/deploy-pages.yml` com permissões `pages: write` e `id-token: write`, empacotando e publicando automaticamente a pasta `Miguel/Canudos/` no GitHub Pages a cada push na branch `main` ou via disparo manual (`workflow_dispatch`).
+  - **URL Canônica do Jogo Online:** `https://chneto.github.io/CANUDOS-TD/`
 
 
 

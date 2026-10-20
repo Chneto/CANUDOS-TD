@@ -184,6 +184,13 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - Teclas rápidas de teclado: `T` (Top-Down 75°), `Y` (Rasante 25°), `+` / `-` (Zoom).
   - Paridade no Godot 4.3 (`scenes/map/map.gd`) ajustando `camera_pivot.scale.y` e `camera.zoom`.
 
+### 1.18 Publicação no GitHub Pages e Automação CI/CD (T29 — Resolvido)
+* **Objetivo:** Disponibilizar o jogo Canudos TD publicamente online via GitHub Pages no endereço canônico do repositório (`https://chneto.github.io/CANUDOS-TD/`).
+* **Implementação Dual-Resiliente:**
+  - **Branch Dedicada `gh-pages`:** Criada via `git subtree split --prefix Miguel/Canudos -b gh-pages` e enviada ao repositório remoto (`origin/gh-pages`). Contém a raiz do jogo web (`index.html`, `ui.js`, `render_pixel.js`, `nucleo.js`, `dados.js`, `historia.js`, `abertura.js`, `musica_canudos.wav`, `capa.jpg`, `fontes/`) para servir instantaneamente caso o repositório esteja configurado no modo tradicional "Deploy from a branch".
+  - **Workflow GitHub Actions (`.github/workflows/deploy-pages.yml`):** Configurado com `actions/upload-pages-artifact@v3` e `actions/deploy-pages@v4`, permissões `pages: write` e acionamento a cada push em `main` que toque em `Miguel/Canudos/**` ou por disparo manual (`workflow_dispatch`).
+  - **Documentação & Readme:** Badges de acesso online, tabela completa de atalhos e controles adicionados ao `README.md` e `docs/TASKS.md`.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
