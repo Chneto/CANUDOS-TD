@@ -22,6 +22,7 @@ var _ordered_stops: Array[Dictionary] = []
 var _next_stop_index: int = 0
 var _active_barricade: Barricade
 var _attack_timer: float = 0.0
+var _walk_time: float = 0.0
 
 
 ## Configure antes de adicionar o nó à Path2D.
@@ -36,7 +37,6 @@ func configure(enemy_definition: EnemyDefinition, manager: GameManager, sites: A
 func _ready() -> void:
 	add_to_group("enemies")
 	loop = false
-	# Sprites 3/4 ficam em pé; sem isso a PathFollow2D deita o soldado nos trechos verticais.
 	rotates = false
 	_path = get_parent() as Path2D
 	if definition == null or game_manager == null or _path == null or _path.curve == null:
@@ -51,6 +51,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if state == State.MOVING:
 		_advance(delta)
+		_animate_movement(delta)
 	elif state == State.ATTACKING_BARRICADE:
 		_attack_barricade(delta)
 
@@ -65,11 +66,31 @@ func take_damage(amount: float) -> void:
 
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, definition.max_health)
+	_play_hit_feedback()
+
 	if health <= 0.0:
 		state = State.DEFEATED
 		game_manager.report_enemy_defeated(definition.reward_materials)
 		removed_from_wave.emit(self)
 		queue_free()
+
+
+func _play_hit_feedback() -> void:
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null and is_instance_valid(sprite):
+		var tw := create_tween()
+		sprite.modulate = Color(2.5, 0.4, 0.4) # Flash avermelhado de impacto
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.12)
+
+
+func _animate_movement(delta: float) -> void:
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite == null or not is_instance_valid(sprite):
+		return
+	_walk_time += delta * 8.0
+	# Leve balanço vertical de passos e compressão para marcha militar
+	sprite.position.y = -24.0 + sin(_walk_time) * 1.5
+	sprite.scale.y = 1.0 + cos(_walk_time) * 0.02
 
 
 func _build_stop_offsets() -> void:
@@ -116,6 +137,12 @@ func _attack_barricade(delta: float) -> void:
 	if _attack_timer > 0.0:
 		return
 
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null and is_instance_valid(sprite):
+		var tw := create_tween()
+		tw.tween_property(sprite, "position:x", 6.0, 0.06)
+		tw.tween_property(sprite, "position:x", 0.0, 0.1)
+
 	_active_barricade.take_damage(definition.barricade_damage)
 	_attack_timer = definition.attack_interval_s
 	if _active_barricade.is_destroyed():
@@ -125,10 +152,6 @@ func _attack_barricade(delta: float) -> void:
 
 func _find_barricade(site_id: StringName) -> Barricade:
 	for candidate in get_tree().get_nodes_in_group("barricades"):
-		if not (candidate is Barricade) or candidate.site_id != site_id or candidate.is_destroyed():
-			continue
-		if global_position.distance_to(candidate.global_position) > definition.barricade_attack_range_px:
-			push_warning("A barricada %s está fora do alcance do ponto de parada" % site_id)
-			return null
-		return candidate
+		if candidate is Barricade and candidate.site_id == site_id and not candidate.is_destroyed():
+			return candidate
 	return null

@@ -53,6 +53,9 @@ func _ready() -> void:
 	game_manager.enemies_alive_changed.connect(_on_enemies_changed)
 	game_manager.run_finished.connect(_on_run_finished)
 
+	# Wire PlacementManager structure placed
+	placement_manager.structure_placed.connect(_on_structure_placed)
+
 	# Wire UI Buttons
 	btn_wave.pressed.connect(_on_start_wave_pressed)
 	btn_restart.pressed.connect(_on_restart_pressed)
@@ -231,6 +234,53 @@ func _update_hud() -> void:
 			btn_wave.disabled = true
 
 	btn_restart.visible = game_manager.phase == GameManager.Phase.VICTORY or game_manager.phase == GameManager.Phase.DEFEAT
+
+
+func _on_structure_placed(structure: Node2D, _def: StructureDefinition, _cells: Array[Vector2i]) -> void:
+	if structure is DefenseStructure:
+		structure.attack_fired.connect(_on_defense_attack_fired.bind(structure))
+
+
+func _on_defense_attack_fired(target: Enemy, shooter: DefenseStructure) -> void:
+	if not is_instance_valid(shooter) or not is_instance_valid(target):
+		return
+	_spawn_muzzle_and_tracer(shooter.global_position + Vector2(0, -28), target.global_position + Vector2(0, -24))
+
+
+func _spawn_muzzle_and_tracer(from_pos: Vector2, to_pos: Vector2) -> void:
+	# 1. Traçador de tiro de pólvora com fade rápido
+	var line := Line2D.new()
+	line.width = 2.0
+	line.default_color = Color(1.0, 0.85, 0.35, 0.95)
+	line.add_point(to_local(from_pos))
+	line.add_point(to_local(to_pos))
+	add_child(line)
+
+	var tw := create_tween()
+	tw.tween_property(line, "modulate:a", 0.0, 0.09)
+	tw.tween_callback(line.queue_free)
+
+	# 2. Nuvem de fumaça de pólvora seca no cano da espingarda
+	var smoke := CPUParticles2D.new()
+	smoke.position = to_local(from_pos)
+	smoke.emitting = true
+	smoke.one_shot = true
+	smoke.explosiveness = 1.0
+	smoke.lifetime = 0.35
+	smoke.amount = 6
+	smoke.direction = (to_pos - from_pos).normalized()
+	smoke.spread = 30.0
+	smoke.gravity = Vector2(0, -15)
+	smoke.initial_velocity_min = 20.0
+	smoke.initial_velocity_max = 45.0
+	smoke.scale_amount_min = 2.0
+	smoke.scale_amount_max = 4.5
+	smoke.color = Color(0.9, 0.88, 0.82, 0.6)
+	add_child(smoke)
+
+	var smoke_tw := create_tween()
+	smoke_tw.tween_interval(0.4)
+	smoke_tw.tween_callback(smoke.queue_free)
 
 
 func _on_start_wave_pressed() -> void:

@@ -39,7 +39,16 @@ func _process(delta: float) -> void:
 
 	_attack_timer = definition.attack_interval_s
 	attack_fired.emit(target)
+	_play_fire_recoil()
 	target.take_damage(definition.attack_damage)
+
+
+func _play_fire_recoil() -> void:
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null and is_instance_valid(sprite):
+		var tw := create_tween()
+		tw.tween_property(sprite, "position:y", -3.0, 0.04)
+		tw.tween_property(sprite, "position:y", 0.0, 0.08)
 
 
 func _select_target() -> Enemy:

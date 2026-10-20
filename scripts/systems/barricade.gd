@@ -35,10 +35,22 @@ func take_damage(amount: float) -> void:
 
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, definition.max_health)
+	_play_hit_shake()
+
 	if health <= 0.0:
 		_destroyed = true
 		destroyed.emit(site_id)
 		queue_free()
+
+
+func _play_hit_shake() -> void:
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null and is_instance_valid(sprite):
+		var tw := create_tween()
+		sprite.modulate = Color(1.8, 1.3, 0.9) # flash de terra/poeira de taipa
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+		tw.parallel().tween_property(sprite, "position:x", randf_range(-3.0, 3.0), 0.04)
+		tw.tween_property(sprite, "position:x", 0.0, 0.05)
 
 
 func is_destroyed() -> bool:

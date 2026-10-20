@@ -92,10 +92,54 @@ PROMPTS = [
         "width": 896,
         "height": 896,
         "steps": 5
+    },
+    {
+        "id": "prop_tree_juazeiro",
+        "category": "props",
+        "prompt": (
+            "2D game asset prop in 3/4 top-down perspective, ancient Brazilian Juazeiro umbuzeiro tree in the arid Caatinga desert of Canudos. "
+            "Gnarled twisted gray-brown trunk, silvery-pale foliage of mata branca, roots gripping dry red earth and pebbles. "
+            "Historical stylized game illustration, sharp contours, isolated on clean solid plain neutral light gray background"
+        ),
+        "width": 768,
+        "height": 768,
+        "steps": 5
+    },
+    {
+        "id": "prop_rock_lajedo",
+        "category": "props",
+        "prompt": (
+            "2D game asset prop in 3/4 top-down perspective, natural Brazilian sertão granitic rock formation and elevated stone platform (lajedo de pedra). "
+            "Weathered reddish-gray sandstone slab with flat upper surface and natural steps, arid caatinga dust. "
+            "Historical stylized tactical game illustration, sharp silhouette, isolated on clean solid plain neutral light gray background"
+        ),
+        "width": 768,
+        "height": 768,
+        "steps": 5
+    },
+    {
+        "id": "prop_house_taipa",
+        "category": "props",
+        "prompt": (
+            "2D tactical game structure asset in 3/4 top-down perspective, rustic sertanejo adobe house from Arraial de Canudos. "
+            "Sun-baked red mud-and-wattle (taipa de mão) walls with exposed wooden lattice, aged rustic clay tile roof (telha colonial), small weathered wooden doorway. "
+            "Gritty historical illustration, sharp outlines, isolated on clean solid plain neutral light gray background"
+        ),
+        "width": 896,
+        "height": 896,
+        "steps": 5
     }
 ]
 
-def generate_asset(item):
+def generate_asset(item, force=False):
+    raw_dir = os.path.join("assets", "raw")
+    os.makedirs(raw_dir, exist_ok=True)
+    output_path = os.path.join(raw_dir, f"{item['id']}.png")
+    
+    if os.path.exists(output_path) and not force:
+        print(f"Asset '{item['id']}' already exists in {output_path}, skipping generation.")
+        return output_path
+
     url = "http://127.0.0.1:7860/sdapi/v1/txt2img"
     payload = {
         "prompt": item["prompt"],
@@ -120,10 +164,6 @@ def generate_asset(item):
             result = json.loads(response.read().decode('utf-8'))
             image_base64 = result['images'][0]
             
-            raw_dir = os.path.join("assets", "raw")
-            os.makedirs(raw_dir, exist_ok=True)
-            output_path = os.path.join(raw_dir, f"{item['id']}.png")
-            
             with open(output_path, "wb") as f:
                 f.write(base64.b64decode(image_base64))
             print(f"-> Saved raw: {output_path}")
@@ -132,9 +172,17 @@ def generate_asset(item):
         print(f"Error generating {item['id']}: {e}")
         return None
 
-def process_to_sprite(raw_path, item):
+def process_to_sprite(raw_path, item, force=False):
     if not os.path.exists(raw_path):
         return
+    out_dir = os.path.join("assets", "sprites", item["category"])
+    os.makedirs(out_dir, exist_ok=True)
+    final_path = os.path.join(out_dir, f"{item['id']}.png")
+
+    if os.path.exists(final_path) and not force:
+        print(f"Sprite '{item['id']}' already exists in {final_path}, skipping rembg.")
+        return final_path
+
     try:
         from rembg import remove
         
@@ -155,19 +203,18 @@ def process_to_sprite(raw_path, item):
         offset = ((target_size[0] - img.size[0]) // 2, target_size[1] - img.size[1]) # anchor to bottom
         final_canvas.paste(img, offset)
         
-        out_dir = os.path.join("assets", "sprites", item["category"])
-        os.makedirs(out_dir, exist_ok=True)
-        final_path = os.path.join(out_dir, f"{item['id']}.png")
         final_canvas.save(final_path, "PNG")
         print(f"-> Saved final game sprite: {final_path}")
+        return final_path
     except Exception as e:
         print(f"Error processing sprite for {item['id']}: {e}")
+        return None
 
 if __name__ == "__main__":
-    print(f"Starting continuous batch generation of {len(PROMPTS)} game assets...")
+    print(f"Batch generation pipeline for {len(PROMPTS)} game assets...")
     for item in PROMPTS:
         raw = generate_asset(item)
         if raw:
             process_to_sprite(raw, item)
-        time.sleep(2)
-    print("\nBatch generation complete!")
+        time.sleep(1)
+    print("\nBatch pipeline check complete!")
