@@ -18,6 +18,8 @@ const TEX_CACTUS := preload("res://assets/sprites/props/prop_cactus_mandacaru.pn
 const TEX_LAJEDO := preload("res://assets/sprites/props/prop_rock_lajedo.png")
 const TEX_JUAZEIRO := preload("res://assets/sprites/props/prop_tree_juazeiro.png")
 const TEX_HOUSE := preload("res://assets/sprites/props/prop_house_taipa.png")
+const TEX_SNIPER := preload("res://assets/sprites/towers/tower_sniper_jagunco.png")
+const TEX_BARRICADE := preload("res://assets/sprites/towers/tower_barricade_taipa.png")
 
 # Cactus decorative placement positions (in grid cells)
 const CACTUS_CELLS: Array[Vector2i] = [
@@ -141,6 +143,15 @@ func _process(delta: float) -> void:
 	if game_manager.phase == GameManager.Phase.WAVE_ACTIVE:
 		queue_redraw()
 
+	# Atualiza o hover e a prévia fantasma da torre a 60 FPS quando em modo construção
+	if active_build_definition != null and DisplayServer.get_name() != "headless":
+		var mouse_cell := _screen_to_cell(get_global_mouse_position())
+		if mouse_cell != current_hover_cell:
+			current_hover_cell = mouse_cell
+			var status := placement_manager.preview_at(active_build_definition, current_hover_cell)
+			hover_is_valid = status["valid"]
+			queue_redraw()
+
 	# Processa tremor suave de câmera
 	if _shake_timer > 0.0:
 		_shake_timer -= delta
@@ -186,7 +197,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion and _middle_dragging:
 		var delta_x: float = event.position.x - _last_drag_pos.x
 		if camera_pivot != null:
-			camera_pivot.rotation += delta_x * 0.005
+			# Rotação orbital cônica/funil: amplitude limitada (-36° a +36°) para que o mundo NUNCA fique de cabeça para baixo
+			camera_pivot.rotation = clampf(camera_pivot.rotation + delta_x * 0.0035, -0.628, 0.628)
 			if btn_camera:
 				btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(camera_pivot.rotation)
 		_last_drag_pos = event.position
@@ -372,10 +384,27 @@ func _draw() -> void:
 		# Círculo de alcance do atirador durante a prévia de construção
 		if active_build_definition.kind == StructureDefinition.Kind.SHOOTER:
 			var center_preview := (Vector2(current_hover_cell) + Vector2(1.0, 0.5)) * cell_size
-			var range_color := Color(0.2, 0.8, 1.0, 0.45) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.35)
-			var fill_color := Color(0.2, 0.8, 1.0, 0.08) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.05)
+			var range_color := Color(0.2, 0.85, 1.0, 0.8) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.6)
+			var fill_color := Color(0.2, 0.85, 1.0, 0.12) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.06)
 			draw_circle(center_preview, active_build_definition.attack_range_px, fill_color)
-			draw_arc(center_preview, active_build_definition.attack_range_px, 0.0, TAU, 64, range_color, 2.0)
+			draw_arc(center_preview, active_build_definition.attack_range_px, 0.0, TAU, 72, range_color, 2.5)
+			draw_line(center_preview - Vector2(10, 0), center_preview + Vector2(10, 0), range_color, 1.5)
+			draw_line(center_preview - Vector2(0, 10), center_preview + Vector2(0, 10), range_color, 1.5)
+
+			# Fantasma transparente da guarnição de jagunços no mapa
+			var spr_w := cell_size * 2.0
+			var spr_h := cell_size * 1.5
+			var spr_rect := Rect2(current_hover_cell.x * cell_size, (current_hover_cell.y - 0.5) * cell_size, spr_w, spr_h)
+			var spr_mod := Color(1.0, 1.0, 1.0, 0.7) if hover_is_valid else Color(1.0, 0.4, 0.4, 0.5)
+			draw_texture_rect(TEX_SNIPER, spr_rect, false, spr_mod)
+
+		elif active_build_definition.kind == StructureDefinition.Kind.BARRICADE:
+			# Fantasma transparente da barricada de taipa
+			var spr_w := cell_size * 2.0
+			var spr_h := cell_size * 1.25
+			var spr_rect := Rect2(current_hover_cell.x * cell_size, (current_hover_cell.y - 0.25) * cell_size, spr_w, spr_h)
+			var spr_mod := Color(1.0, 1.0, 1.0, 0.7) if hover_is_valid else Color(1.0, 0.4, 0.4, 0.5)
+			draw_texture_rect(TEX_BARRICADE, spr_rect, false, spr_mod)
 
 
 func _screen_to_cell(pos: Vector2) -> Vector2i:
@@ -556,14 +585,23 @@ func _on_run_finished(won: bool) -> void:
 
 
 func _on_camera_pressed() -> void:
-	is_camera_aligned = not is_camera_aligned
-	var target_rot := ALIGNED_CAMERA_ANGLE if is_camera_aligned else 0.0
+	var cur_rot := camera_pivot.rotation if camera_pivot != null else 0.0
+	var target_rot := 0.0
+	if absf(cur_rot) < 0.08:
+		target_rot = ALIGNED_CAMERA_ANGLE # -26.565 graus
+		lbl_status.text = "Câmera alinhada perpendicular à marcha dos soldados (-26,5°)."
+	elif cur_rot < -0.2:
+		target_rot = -ALIGNED_CAMERA_ANGLE # +26.565 graus (flanco)
+		lbl_status.text = "Câmera em vista de flanco (+26,5°)."
+	else:
+		target_rot = 0.0
+		lbl_status.text = "Câmera em vista frontal padrão (0°)."
+
 	if camera_pivot != null:
 		var tw := create_tween()
-		tw.tween_property(camera_pivot, "rotation", target_rot, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(camera_pivot, "rotation", target_rot, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if btn_camera != null:
 		btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(target_rot)
-	lbl_status.text = "Câmera %s (Arraste com botão do meio do mouse para girar 360°, ou use a roda para zoom)" % ["alinhada à rota" if is_camera_aligned else "padrão"]
 	queue_redraw()
 
 

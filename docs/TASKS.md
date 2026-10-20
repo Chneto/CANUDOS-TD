@@ -33,6 +33,7 @@
 | T23 | Áudio tátil avançado e sombras de projeção isométrica | Antigravity | concluída | T20, T21 | Síntese de novas assinaturas de áudio (Mutirão com sino de capela, Prédica com coro etéreo, Fanfarra de Vitória, Cadência de Derrota) e projeção de sombras elípticas de base suave em todas as estruturas. |
 | T24 | Paridade de Câmera 360°, Zoom, SFX e Floating Combat Text na Godot 4.3 | Antigravity / Codex | concluída | T21, T22 | `CameraPivot` e `Camera2D` com rotação livre 360° no botão do meio do mouse, zoom com a roda, botão de alinhamento perpendicular (-26,5°), 7 efeitos sonoros WAV sintetizados (`sfx_musket`, `sfx_impact`, `sfx_wave_horn`, `sfx_mutirao`, `sfx_predica`, `sfx_victory`, `sfx_defeat`), partículas ambientais `CaatingaDust`, tremor de tela e números flutuantes de dano e cura. |
 | T25 | Pintura e integração da Arte de Capa Canônica (`capa.jpg`) | Antigravity | concluída | T06, T16 | Criação da pintura de capa (1280x720) retratando o crepúsculo da Caatinga, a Igreja de Bom Jesus iluminada por velas, o Arraial de Canudos e Antônio Conselheiro com bordão e crucifixo. Integrada nos menus Web e PC. Recompilado `Canudos.exe`. |
+| T26 | Câmera Orbital em Funil sem Inversão e Prévia Tática com Alcance | Antigravity / Codex | concluída | T21, T24 | Arco de rotação orbital limitado a [-36°, +36°] com zoom dinâmico de funil (0.85x a 1.75x) impedindo inversão de cabeça para baixo; círculo de alcance de 220px e sprite fantasma translúcido de atiradores e barricadas em tempo real durante hover. |
 
 ### Notas da T15 (Antigravity)
 
@@ -82,6 +83,21 @@
   - Pintura digital (1280x720) do crepúsculo sertanejo com as serras ao fundo, o Arraial de Canudos, a Igreja de Bom Jesus iluminada por vigília de velas e Antônio Conselheiro em perfil com seu manto, crucifixo peitoral e bordão de jurema.
   - Integrada em `Miguel/Canudos/capa.jpg` e `Miguel/Canudos_PC/jogo/capa.jpg`.
   - Recompilado `Canudos.exe` com WebView2 para Windows nativo.
+
+### Notas da T26 (Antigravity & Codex)
+
+- **Câmera Orbital em Funil sem Inversão:**
+  - Ajustado o clamp angular para o intervalo $[-0.628, +0.628]$ radianos ($\pm 36^\circ$).
+  - O jogador pode arrastar com o botão do meio do mouse para orbitar pelo vale sem que o mapa fique de ponta-cabeça.
+  - O movimento do mouse no eixo Y ou scroll wheel atua na elevação cônica/zoom ($0.85\times$ a $1.75\times$).
+  - O botão `bt-camera` cicla suavemente entre `0° Clássica`, `-26,5° Alinhada` (paralela à tela) e `+26,5° Flanco`.
+  - Aplicada paridade no Godot 4.3 (`scenes/map/map.gd`) limitando o `CameraPivot` a $\pm 36^\circ$.
+- **Prévia Dinâmica e Círculo Tático de Alcance:**
+  - Adicionado ouvinte `pointermove` contínuo no canvas `#tela` em `ui.js`.
+  - No `render_pixel.js`, ao selecionar ferramenta de atiradores ou barricada, a célula sob o cursor projeta o anel de alcance de 220px (`ovElipse(gx, gy, 220, 110, ...)`), a moldura de célula e o sprite fantasma translúcido de atiradores ou barricada (`globalAlpha = 0.55`).
+  - No Godot 4.3 (`scenes/map/map.gd`), `_draw()` renderiza o sprite fantasma carregado (`TEX_SNIPER`/`TEX_BARRICADE`) e o círculo com retículo tático central.
+  - Validado via teste E2E com Playwright e screenshot capturada. Recompilado `Canudos.exe`.
+
 
 ## Regras do quadro
 

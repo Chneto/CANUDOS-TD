@@ -126,6 +126,26 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
 * **Eliminação de Erros de Rede:** A imagem soluciona o erro 404 anteriormente reportado no console do jogo web/PC, enriquecendo o menu de abertura.
 * **Compilação Nativa:** Recompilado `Miguel/Canudos_PC/Canudos.exe` via WebView2 com os novos assets e comportamentos.
 
+### 1.15 Câmera Orbital Cônica em Funil sem Inversão e Pré-visualização Tática de Torres com Alcance (T26 — Resolvido)
+* **Sintoma 1 (Câmera de Cabeça para Baixo):** A rotação anterior 2D girava a tela inteira sem restrição angular, causando inversão de 180° e deixando o mapa de cabeça para baixo.
+* **Causa Raiz 1:** Aplicação de rotação livre 360° no plano de projeção 2D sem delimitação cônica do ponto de observação.
+* **Solução 1 (Câmera Orbital em Funil):**
+  - Limitado o arco de rotação para $[-0.628, +0.628]$ radianos ($\pm 36^\circ$), permitindo visão orbital panorâmica e cônica ao redor do vale da Caatinga sem qualquer risco de o mapa ou os textos ficarem invertidos.
+  - O botão do HUD agora cicla entre três perspectivas táticas estritamente calibradas:
+    - `0° Clássica` (visão frontal isométrica);
+    - `-26,5° Alinhada` (perpendicular à rota dos soldados, paralela à tela);
+    - `+26,5° Flanco` (visão do flanco oposto).
+  - O movimento vertical do mouse durante o arrasto do scroll altera suavemente o zoom/elevação (efeito funil de $0.85\times$ a $1.75\times$).
+  - No Godot 4.3 (`scenes/map/map.gd`), a rotação do `CameraPivot` foi fixada no mesmo arco $[-36^\circ, +36^\circ]$.
+
+* **Sintoma 2 (Ausência de Alcance e Prévia ao Selecionar Torre):** Ao selecionar os atiradores/barricadas, não aparecia a prévia translúcida da torre nem o círculo de alcance ao mover o mouse.
+* **Causa Raiz 2:** No código web (`ui.js`), não existia ouvinte de evento `pointermove` registrado no canvas `#tela`; `vis.hover` só era calculado no clique (`pointerdown`). Na Godot (`map.gd`), o método `_draw()` apenas destacava o retângulo da célula vazia sem desenhar a textura do atirador/barricada e sem o círculo de mira com raio tático de 220px.
+* **Solução 2 (Prévia Dinâmica e Círculo Tático):**
+  - Adicionado `pointermove` com atualização contínua de `vis.hover` no canvas web e no jogo nativo PC.
+  - No `render_pixel.js`, ao detectar `vis.ferramenta`, o renderizador projeta na célula sob o cursor a elipse de alcance tático de 220px (`ovElipse(gx, gy, 220, 110, ...)`), a célula destacada e o sprite translúcido de Jagunços ou Barricada (`ctx.globalAlpha = 0.55`).
+  - No Godot 4.3 (`map.gd`), carregadas as texturas canônicas `TEX_SNIPER` e `TEX_BARRICADE`, renderizando no `_draw()` o sprite fantasma e o círculo tracejado com retículo em cruz de alcance de 220px.
+  - Testado e comprovado com screenshot Playwright E2E em `screenshot_previa_atiradores_suave.png`.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
@@ -154,5 +174,5 @@ node Miguel/Canudos/testes/campanha.js
 ## 3. Estado Atual das Tarefas (Marcos 0 e 1 Concluídos)
 
 * **T01 a T06 (Marco 0 — Fundação):** Todas 100% concluídas.
-* **T10 a T25 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual):** Todas 100% concluídas e testadas.
+* **T10 a T26 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual, Câmera Orbital e Prévia):** Todas 100% concluídas e testadas.
 * **Próximo Marco:** Marco 2 — Progressão, Fases da Campanha (1ª a 4ª Expedição) e Artilharia/Morteros históricos.

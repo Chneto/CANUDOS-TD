@@ -29,8 +29,8 @@ flowchart LR
 
 ---
 
-### Marco 1: Ciclo Jogável do MVP (SPRINT ATUAL — 90% CONCLUÍDO)
-**Objetivo:** Permitir que o jogador entre no mapa, posicione atiradores e barricadas, inicie a onda e veja o combate ocorrer com vitória ou derrota claras.
+### Marco 1: Ciclo Jogável do MVP (CONCLUÍDO — 100%)
+**Objetivo:** Permitir que o jogador entre no mapa, posicione atiradores e barricadas, inicie a onda e veja o combate ocorrer com vitória ou derrota claras, suporte a áudio sertanejo, câmera orbital em funil, campeão Antônio Conselheiro e prévias táticas dinâmicas.
 
 - [x] Implementação do `GameManager.gd` (fase, saúde da igreja, materiais, pontuação).
 - [x] Implementação do `WaveManager.gd` (geração cadenciada de 6 soldados republicanos).
@@ -41,8 +41,13 @@ flowchart LR
 - [x] Criação da cena principal [scenes/map/map.tscn](scenes/map/map.tscn) com renderização de terreno e rota.
 - [x] Correções da 1ª execução Godot 4.3 (T17: orientação reta do soldado, resolução de NodePaths, alcance de F1/F3).
 - [x] Criação de suíte de teste headless automatizada ([tests/sim_onda.gd](tests/sim_onda.gd)).
-- [ ] **T15 (Em andamento - Antigravity):** Reorganizar o layout do HUD para eliminar sobreposição visual nas linhas 0 e 10 (Igreja e entrada), adicionar círculo de alcance de torre e feedback de posicionamento polido.
-- [ ] **T16 (Claude):** Auditoria de jogabilidade, tom histórico e clareza das mensagens.
+- [x] **T15 / T18 (Antigravity):** Reorganização do layout do HUD para cartões flutuantes táticos, correção de dimensões e cortes (Conselheiro e Mutirão), prevenção de sobreposição.
+- [x] **T16 (Claude):** Auditoria de jogabilidade, tom histórico e clareza das mensagens (`docs/research/audit-compreensao-tom.md`).
+- [x] **T19 / T20 (Antigravity):** Cenografia avançada da Caatinga (juazeiro, lajedo, taipa) e trilha sonora sertaneja autoral (viola, pífano, zabumba).
+- [x] **T21 / T23 / T24 (Antigravity & Codex):** Controle de volume contínuo (0-100%), efeitos sonoros autênticos (7 WAVs), textos de combate flutuantes e partículas.
+- [x] **T22 (Codex & Antigravity):** Campeão Antônio Conselheiro no Godot 4.3 com aura de 192px, Mutirão e Prédica.
+- [x] **T25 (Antigravity):** Arte de capa canônica de Belo Monte (`capa.jpg`) e compilação do executável Windows nativo `Canudos.exe`.
+- [x] **T26 (Antigravity & Codex):** Câmera orbital cônica em funil (amplitude [-36°, +36°] sem inversão do mapa) e pré-visualização tática contínua com elipse de alcance de 220px e sprite fantasma translúcido sob o mouse.
 
 ---
 
