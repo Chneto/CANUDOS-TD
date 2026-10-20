@@ -146,6 +146,30 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - No Godot 4.3 (`map.gd`), carregadas as texturas canônicas `TEX_SNIPER` e `TEX_BARRICADE`, renderizando no `_draw()` o sprite fantasma e o círculo tracejado com retículo em cruz de alcance de 220px.
   - Testado e comprovado com screenshot Playwright E2E em `screenshot_previa_atiradores_suave.png`.
 
+### 1.16 Overscan Buffer Expandido, Sprites Direcionais 4 Ângulos e Foco Tático por Retas (T27 — Resolvido)
+* **Sintoma 1 (Cantos Cortados ao Girar a Câmera):** Ao girar o mapa em qualquer ângulo (ex: -26,5° alinhado ou +26,5° flanco), os cantos da tela mostravam triângulos vazios/cortados onde o buffer do mapa terminava.
+* **Causa Raiz 1:** O buffer `B.cv` era gerado apenas com a largura mínima da tela (`MARGEM = 8` a `80`, `BASE = 80`). Ao sofrer rotação afim de matriz $R(\theta)$, os cantos geométricos entravam no frustum de visão da viewport.
+* **Solução 1 (Buffer Circunscrito com Overscan):**
+  - Margens expandidas para `MARGEM = 240, TOPO = 180, BASE = 480`.
+  - A renderização de terreno da Caatinga gera relevo, rio Vaza-Barris, lajedos e juazeiros cobrindo uma área bem maior que a tela.
+  - O buffer `B.cv` cobre 100% da viewport em qualquer ângulo ou nível de zoom, eliminando completamente qualquer corte nos cantos.
+
+* **Sintoma 2 (Imagens Planas em Ângulo Único):** Os personagens pareciam folhas de papel planas sem mudança de perspectiva ao virar as curvas do retângulo ou quando a câmera girava.
+* **Solução 2 (Sprites Direcionais em 4 Ângulos Cardeais):**
+  - Implementado sistema 2.5D com decomposição vetorial de tela: `angTela = angMundo - rotacaoCamera`.
+  - **Soldados Republicanos:**
+    - `frente` (Sul): Peitoral simétrico com talabarte branco cruzado em 'X', quepe com pala frontal e baioneta apontando para frente (ativo na descida da serra em direção ao jogador).
+    - `perfil` (Leste/Oeste): Marcha de infantaria com passada larga, silhueta lateral, mochila de campanha às costas e fuzil Mauser na horizontal apontando na direção da marcha (ativo na reta central longa e espelhado com `esq` para marcha a Oeste).
+    - `costas` (Norte): Visão dorsal com mochila de lona em destaque e túnica azul-ferrete.
+  - **Defensores / Conselheiro / Barricadas:** Reorientação dinâmica de acordo com a perspectiva ativa da câmera.
+
+* **Sintoma 3 (Dificuldade de Observar as Diferentes Retas do Mapa):** A câmera ficava estática no centro do vale, sem permitir focar nos trechos específicos onde a infantaria descia ou onde a igreja estava sendo atacada.
+* **Solução 3 (Câmera com Foco Tático e Pan Livre):**
+  - Adicionado grupo de botões de enquadramento rápido no HUD: `[📍 Geral]`, `[1. Entrada]`, `[2. Reta Central]` e `[3. Igreja]`.
+  - Transição por interpolação suave (lerp) a 60 FPS com enquadramento tático perfeito de cada setor, preservando o ângulo superior.
+  - Pan livre por arrasto com o botão direito do mouse (`button === 2`) ou teclas `WASD` / `Setas` do teclado.
+  - Sincronização em `Miguel/Canudos/`, `Miguel/Canudos_PC/jogo/`, Godot 4.3 (`scenes/map/map.gd`) e compilação do executável `Canudos.exe`.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
@@ -174,5 +198,5 @@ node Miguel/Canudos/testes/campanha.js
 ## 3. Estado Atual das Tarefas (Marcos 0 e 1 Concluídos)
 
 * **T01 a T06 (Marco 0 — Fundação):** Todas 100% concluídas.
-* **T10 a T26 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual, Câmera Orbital e Prévia):** Todas 100% concluídas e testadas.
+* **T10 a T27 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual, Câmera Orbital, Sprites Direcionais e Pan Tático):** Todas 100% concluídas e testadas.
 * **Próximo Marco:** Marco 2 — Progressão, Fases da Campanha (1ª a 4ª Expedição) e Artilharia/Morteros históricos.

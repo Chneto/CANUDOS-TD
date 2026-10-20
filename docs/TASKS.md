@@ -34,6 +34,7 @@
 | T24 | Paridade de Câmera 360°, Zoom, SFX e Floating Combat Text na Godot 4.3 | Antigravity / Codex | concluída | T21, T22 | `CameraPivot` e `Camera2D` com rotação livre 360° no botão do meio do mouse, zoom com a roda, botão de alinhamento perpendicular (-26,5°), 7 efeitos sonoros WAV sintetizados (`sfx_musket`, `sfx_impact`, `sfx_wave_horn`, `sfx_mutirao`, `sfx_predica`, `sfx_victory`, `sfx_defeat`), partículas ambientais `CaatingaDust`, tremor de tela e números flutuantes de dano e cura. |
 | T25 | Pintura e integração da Arte de Capa Canônica (`capa.jpg`) | Antigravity | concluída | T06, T16 | Criação da pintura de capa (1280x720) retratando o crepúsculo da Caatinga, a Igreja de Bom Jesus iluminada por velas, o Arraial de Canudos e Antônio Conselheiro com bordão e crucifixo. Integrada nos menus Web e PC. Recompilado `Canudos.exe`. |
 | T26 | Câmera Orbital em Funil sem Inversão e Prévia Tática com Alcance | Antigravity / Codex | concluída | T21, T24 | Arco de rotação orbital limitado a [-36°, +36°] com zoom dinâmico de funil (0.85x a 1.75x) impedindo inversão de cabeça para baixo; círculo de alcance de 220px e sprite fantasma translúcido de atiradores e barricadas em tempo real durante hover. |
+| T27 | Overscan Circular, Sprites Direcionais 4 Ângulos e Foco Tático por Retas | Antigravity / Codex | concluída | T21, T26 | Eliminação de cantos cortados no giro via buffer circunscrito com overscan (MARGEM 240, BASE 480) e Caatinga contínua; Sprites direcionais em 4 ângulos cardeais (Frente/Sul, Perfil/Leste-Oeste, Costas/Norte) dinâmicos conforme rotação de câmera e vetor de marcha; Sistema de pan suave por arrasto com botão direito/WASD e 4 botões de enquadramento rápido no HUD ([Geral], [1. Entrada], [2. Reta Central], [3. Igreja]). |
 
 ### Notas da T15 (Antigravity)
 
@@ -97,6 +98,25 @@
   - No `render_pixel.js`, ao selecionar ferramenta de atiradores ou barricada, a célula sob o cursor projeta o anel de alcance de 220px (`ovElipse(gx, gy, 220, 110, ...)`), a moldura de célula e o sprite fantasma translúcido de atiradores ou barricada (`globalAlpha = 0.55`).
   - No Godot 4.3 (`scenes/map/map.gd`), `_draw()` renderiza o sprite fantasma carregado (`TEX_SNIPER`/`TEX_BARRICADE`) e o círculo com retículo tático central.
   - Validado via teste E2E com Playwright e screenshot capturada. Recompilado `Canudos.exe`.
+
+### Notas da T27 (Antigravity & Codex)
+
+- **Eliminação Definitiva de Cantos Cortados (Buffer Circunscrito com Overscan):**
+  - Margens do mundo expandidas para `MARGEM = 240, TOPO = 180, BASE = 480`. O gerador procedural estende continuamente o leito do rio, a vegetação e as serras bem além dos limites visíveis da janela.
+  - O buffer `B.cv` e a transformação afim cobrem 100% da viewport em qualquer rotação $\pm 36^\circ$, zoom ou translação, eliminando qualquer aresta ou triângulo vazio nos cantos do monitor.
+- **Sprites Direcionais em 4 Ângulos Cardeais (Sistema 2.5D Multi-Ângulo):**
+  - Implementado cálculo vetorial da orientação na tela: `angTela = angMundo - rotacaoCamera`.
+  - Soldados:
+    - *Frente (Sul):* Peitoral simétrico com talabarte branco em 'X', quepe militar com pala frontal e baioneta apontando para frente (utilizado na descida inicial da serra).
+    - *Perfil (Leste/Oeste):* Marcha de infantaria com passada dinâmica, silhueta lateral, mochila de campanha às costas e fuzil Mauser em riste apontando na direção da marcha (utilizado na reta central longa e espelhado para Oeste).
+    - *Costas (Norte):* Visão dorsal com mochila volumosa e túnica azul-ferrete.
+  - Jagunços e Conselheiro adaptam suas posturas conforme o ângulo de mira e caminhada.
+- **Câmera com Foco Tático por Setores (Pan & Framing):**
+  - Adicionado grupo de botões táticos `.foco-setores` na barra superior: `[📍 Geral]`, `[1. Entrada]`, `[2. Reta Central]` e `[3. Igreja]`.
+  - Interpolação suave e cinematográfica (lerp a 60 FPS) transladando a câmera com enquadramento perfeito mantendo a perspectiva superior isométrica.
+  - Suporte a pan por arrasto com botão direito do mouse (`button === 2`) e teclas de atalho `WASD` / `Setas` / `J, K, L`.
+  - Paridade implementada no Godot 4.3 em `scenes/map/map.gd` (`focar_setor` e arrasto com botão direito).
+
 
 
 ## Regras do quadro

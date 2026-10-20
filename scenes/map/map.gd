@@ -84,6 +84,9 @@ const ALIGNED_CAMERA_ANGLE: float = -0.4636476 # -26.565 graus alinhado à traje
 var is_camera_aligned: bool = false
 var _middle_dragging: bool = false
 var _last_drag_pos: Vector2 = Vector2.ZERO
+var _is_right_panning: bool = false
+var _right_pan_start: Vector2 = Vector2.ZERO
+var _right_pan_moved: bool = false
 var _shake_timer: float = 0.0
 var _shake_strength: float = 0.0
 
@@ -204,6 +207,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		_last_drag_pos = event.position
 		queue_redraw()
 
+	elif event is InputEventMouseMotion and _is_right_panning:
+		var delta: Vector2 = event.position - _right_pan_start
+		if delta.length() > 3.0:
+			_right_pan_moved = true
+		if camera_pivot != null:
+			camera_pivot.position -= delta * (1.0 / (camera.zoom.x if camera != null else 1.0))
+		_right_pan_start = event.position
+		queue_redraw()
+
 	# 2. Hover e Posicionamento
 	if event is InputEventMouseMotion and not _middle_dragging:
 		var cell := _screen_to_cell(event.position)
@@ -226,8 +238,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				hover_is_valid = false
 			queue_redraw()
 
-	elif event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			var cell := _screen_to_cell(event.position)
 			if active_build_definition != null:
 				var placed := placement_manager.place_structure(active_build_definition, cell)
@@ -246,10 +258,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				else:
 					lbl_status.text = "Destino inválido: o Conselheiro só anda fora da estrada e dentro do mapa."
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			active_build_definition = null
-			champion_selected = false
-			lbl_status.text = "Seleção cancelada."
-			queue_redraw()
+			if event.pressed:
+				_is_right_panning = true
+				_right_pan_start = event.position
+				_right_pan_moved = false
+			else:
+				_is_right_panning = false
+				if not _right_pan_moved:
+					active_build_definition = null
+					champion_selected = false
+					lbl_status.text = "Seleção cancelada."
+					queue_redraw()
 
 	# 3. Atalhos de Teclado
 	elif event is InputEventKey and event.pressed and not event.echo:
@@ -266,7 +285,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_C:
 			_on_camera_pressed()
 		elif event.keycode == KEY_R:
-			_reset_camera()
+			focar_setor("geral")
+		elif event.keycode == KEY_J:
+			focar_setor("entrada")
+		elif event.keycode == KEY_K:
+			focar_setor("reta")
+		elif event.keycode == KEY_L:
+			focar_setor("igreja")
 		elif event.keycode == KEY_ESCAPE:
 			active_build_definition = null
 			champion_selected = false
@@ -280,6 +305,9 @@ func _draw() -> void:
 
 	var cell_size := float(map_definition.cell_size_px)
 	var sz := Vector2(cell_size, cell_size)
+
+	# 0. Fundo infinito de Overscan da Caatinga (elimina qualquer borda/canto cortado ao rotacionar)
+	draw_rect(Rect2(-1200, -1200, 3680, 3104), Color(0.72, 0.54, 0.33), true)
 
 	# 1. Desenhar grid e terreno base (Caatinga e Estrada)
 	for y in range(map_definition.grid_size.y):
@@ -602,6 +630,35 @@ func _on_camera_pressed() -> void:
 		tw.tween_property(camera_pivot, "rotation", target_rot, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if btn_camera != null:
 		btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(target_rot)
+	queue_redraw()
+
+
+func focar_setor(setor_nome: String) -> void:
+	if camera_pivot == null or camera == null:
+		return
+	var tw := create_tween().set_parallel(true)
+	if setor_nome == "geral":
+		tw.tween_property(camera_pivot, "position", Vector2(640, 352), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(camera_pivot, "rotation", 0.0, 0.35)
+		tw.tween_property(camera, "zoom", Vector2(1.0, 1.0), 0.35)
+		is_camera_aligned = false
+		if btn_camera: btn_camera.text = " 📷 Câmera (0°) "
+	elif setor_nome == "entrada":
+		tw.tween_property(camera_pivot, "position", Vector2(300, 200), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(camera_pivot, "rotation", -0.15, 0.35)
+		tw.tween_property(camera, "zoom", Vector2(1.25, 1.25), 0.35)
+		if btn_camera: btn_camera.text = " 📷 1. Entrada "
+	elif setor_nome == "reta":
+		tw.tween_property(camera_pivot, "position", Vector2(640, 352), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(camera_pivot, "rotation", ALIGNED_CAMERA_ANGLE, 0.35)
+		tw.tween_property(camera, "zoom", Vector2(1.30, 1.30), 0.35)
+		is_camera_aligned = true
+		if btn_camera: btn_camera.text = " 📷 2. Reta Central "
+	elif setor_nome == "igreja":
+		tw.tween_property(camera_pivot, "position", Vector2(980, 480), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(camera_pivot, "rotation", 0.0, 0.35)
+		tw.tween_property(camera, "zoom", Vector2(1.30, 1.30), 0.35)
+		if btn_camera: btn_camera.text = " 📷 3. Igreja "
 	queue_redraw()
 
 

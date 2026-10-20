@@ -259,7 +259,8 @@ kbd {
 .barra > div { height: 100%; background: var(--verde); transition: width .25s ease, background-color .25s; }
 .barra > div.media { background: var(--ouro); }
 .barra > div.baixa { background: var(--perigo); }
-.ritmo { margin-left: auto; display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
+.ritmo { margin-left: auto; display: flex; gap: 5px; align-items: center; flex-wrap: nowrap; }
+#bt-camera { display: none; }
 .botao-placa, .velocidades button {
   background: var(--placa);
   border: 2px solid var(--placa-borda);
@@ -598,6 +599,37 @@ kbd {
   .controle-volume input[type="range"] { width: 50px; }
   .rotulo-volume { font-size: 11px; min-width: 25px; }
   #bt-camera { padding: 5px 8px; font-size: 13px; }
+.foco-setores { display: none; }
+}
+
+.foco-setores {
+  display: inline-flex;
+  gap: 3px;
+  background: rgba(29, 18, 12, 0.45);
+  border: 1px solid var(--placa-borda);
+  border-radius: 4px;
+  padding: 2px 3px;
+  align-items: center;
+}
+.bt-foco {
+  padding: 4px 7px;
+  font-size: 11.5px;
+  background: var(--placa);
+  color: var(--placa-tinta);
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+.bt-foco:hover {
+  border-color: var(--ouro);
+  color: #fff;
+}
+.bt-foco.ativo {
+  background: var(--ouro);
+  color: #1d120c;
+  font-weight: bold;
+  border-color: var(--ouro-2);
 }
 
 @media (max-width: 760px) {
@@ -718,6 +750,12 @@ kbd {
       </div>
       <button type="button" class="botao-placa" id="bt-pausa" disabled>Pausar</button>
       <button type="button" class="botao-placa" id="bt-camera" title="Girar câmera: clique para alternar ou arraste com o botão do meio do mouse (R restaura)">🎥 Alinhada</button>
+      <div class="foco-setores" role="group" aria-label="Enquadrar retas da batalha">
+        <button type="button" class="bt-foco ativo" data-foco="geral" title="Visão geral do arraial">📍 Geral</button>
+        <button type="button" class="bt-foco" data-foco="entrada" title="Foco na 1ª Reta (Descida da Serra)">1. Entrada</button>
+        <button type="button" class="bt-foco" data-foco="reta" title="Foco na 2ª Reta (Barricadas)">2. Reta Central</button>
+        <button type="button" class="bt-foco" data-foco="igreja" title="Foco na 3ª Reta (Igreja de Belo Monte)">3. Igreja</button>
+      </div>
       <div class="controle-volume" role="group" aria-label="Ajuste do volume">
         <button type="button" class="bt-icone" id="bt-mudo" title="Silenciar / Ativar som">🔊</button>
         <input type="range" id="slider-volume" min="0" max="100" value="70" aria-label="Volume da música">
