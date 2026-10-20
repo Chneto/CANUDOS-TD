@@ -2054,7 +2054,8 @@
     var rawRot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : 0;
     // Garante matematicamente que o ângulo nunca ultrapasse o limite orbital seguro (-36° a +36°) e NUNCA vire de cabeça para baixo
     var rot = Math.max(-0.628, Math.min(0.628, rawRot));
-    var zoom = Math.max(0.85, Math.min(1.75, (vis && vis.zoomCamera) || 1.08));
+    var zoom = Math.max(0.68, Math.min(2.30, (vis && vis.zoomCamera) || 1.08));
+    var pitch = Math.max(0.40, Math.min(1.40, (vis && vis.pitchCamera) !== undefined ? vis.pitchCamera : 1.0));
 
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.imageSmoothingEnabled = true;
@@ -2073,7 +2074,7 @@
 
     g.translate(cx + panX, cy + panY);
     if (rot !== 0) g.rotate(rot);
-    if (zoom !== 1) g.scale(zoom, zoom);
+    g.scale(zoom, zoom * pitch);
     g.translate(-cx, -cy);
 
     g.drawImage(B.cv, 0, 0, P.L, P.A);

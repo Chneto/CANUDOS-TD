@@ -510,11 +510,12 @@
     if (naTela === 'jogo') {
       avancar(dt);
 
-      // Interpolação suave e cinematográfica de câmera (Pan, Zoom, Rotação)
+      // Interpolação suave e cinematográfica de câmera (Pan, Zoom, Rotação, Profundidade/Pitch)
       if (vis.alvoPanX !== undefined) vis.cameraPanX = (vis.cameraPanX || 0) + (vis.alvoPanX - (vis.cameraPanX || 0)) * Math.min(1, dt * 9);
       if (vis.alvoPanY !== undefined) vis.cameraPanY = (vis.cameraPanY || 0) + (vis.alvoPanY - (vis.cameraPanY || 0)) * Math.min(1, dt * 9);
       if (vis.alvoRotacao !== undefined) vis.rotacaoCamera = (vis.rotacaoCamera || 0) + (vis.alvoRotacao - (vis.rotacaoCamera || 0)) * Math.min(1, dt * 7);
-      if (vis.alvoZoom !== undefined) vis.zoomCamera = (vis.zoomCamera || 1.08) + (vis.alvoZoom - (vis.zoomCamera || 1.08)) * Math.min(1, dt * 7);
+      if (vis.alvoZoom !== undefined) vis.zoomCamera = (vis.zoomCamera || 1.08) + (vis.alvoZoom - (vis.zoomCamera || 1.08)) * Math.min(1, dt * 8);
+      if (vis.alvoPitch !== undefined) vis.pitchCamera = (vis.pitchCamera || 1.0) + (vis.alvoPitch - (vis.pitchCamera || 1.0)) * Math.min(1, dt * 8);
 
       R.desenhar(ctx, jogo, vis, cena, dpr, { pausado: pausado && jogo.s.fase === 'combate' });
       atualizarInterface();
@@ -599,14 +600,15 @@
 
     var rawRot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : 0;
     var rot = Math.max(-0.628, Math.min(0.628, rawRot));
-    var zoom = Math.max(0.85, Math.min(1.75, (vis && vis.zoomCamera) || 1.08));
+    var zoom = Math.max(0.68, Math.min(2.30, (vis && vis.zoomCamera) || 1.08));
+    var pitch = Math.max(0.40, Math.min(1.40, (vis && vis.pitchCamera) !== undefined ? vis.pitchCamera : 1.0));
     var cx = cena.P.L / 2;
     var cy = cena.P.A / 2;
     var panX = (vis && vis.cameraPanX) || 0;
     var panY = (vis && vis.cameraPanY) || 0;
 
     var dx = (sx - (cx + panX)) / zoom;
-    var dy = (sy - (cy + panY)) / zoom;
+    var dy = (sy - (cy + panY)) / (zoom * pitch);
 
     var cos = Math.cos(-rot);
     var sin = Math.sin(-rot);
@@ -632,31 +634,32 @@
       vis.alvoPanY = 0;
       vis.alvoRotacao = 0;
       vis.alvoZoom = 1.08;
-      avisar('Câmera: Visão Geral de Canudos');
+      vis.alvoPitch = 1.0;
+      avisar('Câmera: Visão Geral (45° Isométrica)');
     } else if (nome === 'entrada') {
-      // Reta 1: Descida da Serra (norte/oeste do mapa)
       var pE = cena.P.p(1.5 * D.celula, 1.5 * D.celula);
       vis.alvoPanX = cx - pE.x;
       vis.alvoPanY = cy - pE.y + 35;
       vis.alvoRotacao = -0.15;
       vis.alvoZoom = 1.35;
+      vis.alvoPitch = 0.85;
       avisar('Câmera: 1. Entrada da Serra (Descida)');
     } else if (nome === 'reta') {
-      // Reta 2: Reta Central das Barricadas (alinhada e paralela à tela)
       var pR = cena.P.p(8.5 * D.celula, 5.5 * D.celula);
       vis.alvoPanX = cx - pR.x;
       vis.alvoPanY = cy - pR.y;
-      vis.alvoRotacao = -0.4636; // -26.5° perfeitamente alinhada
+      vis.alvoRotacao = -0.4636;
       vis.alvoZoom = 1.30;
+      vis.alvoPitch = 0.90;
       avisar('Câmera: 2. Reta Central das Barricadas (Alinhada)');
     } else if (nome === 'igreja') {
-      // Reta 3: Arraial e Igreja de Bom Jesus
       var pI = cena.P.p(15.5 * D.celula, 7.5 * D.celula);
       vis.alvoPanX = cx - pI.x;
       vis.alvoPanY = cy - pI.y;
       vis.alvoRotacao = 0;
-      vis.alvoZoom = 1.35;
-      avisar('Câmera: 3. Igreja de Bom Jesus e Arraial');
+      vis.alvoZoom = 1.40;
+      vis.alvoPitch = 0.70; // Visão rasante imersiva na Igreja
+      avisar('Câmera: 3. Igreja de Bom Jesus (Profundidade Rasante)');
     }
     var btc = $('bt-camera');
     if (btc) {
@@ -727,21 +730,24 @@
       if (arrastandoCamera) {
         var dx = ev.clientX - camMouseX;
         var dy = ev.clientY - camMouseY;
+
+        // Eixo Horizontal (X): Giro Orbital (Yaw) limitado a [-36°, +36°]
         var rotAtual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : 0;
         var novaRot = Math.max(-0.628, Math.min(0.628, rotAtual + dx * 0.0035));
         vis.rotacaoCamera = novaRot;
         vis.alvoRotacao = novaRot;
 
-        var zoomAtual = vis.zoomCamera || 1.08;
-        var novoZ = Math.max(0.85, Math.min(1.75, zoomAtual - dy * 0.002));
-        vis.zoomCamera = novoZ;
-        vis.alvoZoom = novoZ;
+        // Eixo Vertical (Y): Inclinação de Profundidade (Pitch) de 20° a 75° (0.40 a 1.40)
+        var pitchAtual = (vis.pitchCamera !== undefined) ? vis.pitchCamera : 1.0;
+        var novoPitch = Math.max(0.40, Math.min(1.40, pitchAtual - dy * 0.0035));
+        vis.pitchCamera = novoPitch;
+        vis.alvoPitch = novoPitch;
 
         camMouseX = ev.clientX;
         camMouseY = ev.clientY;
 
-        var btc = $('bt-camera');
-        if (btc) btc.textContent = '🎥 ' + Math.round(novaRot * 180 / Math.PI) + '°';
+        var pitchGraus = Math.round(20 + ((novoPitch - 0.40) / (1.40 - 0.40)) * 55);
+        avisar('Câmera: Giro ' + Math.round(novaRot * 180 / Math.PI) + '° · Profundidade ' + pitchGraus + '°');
         return;
       }
 
@@ -790,9 +796,12 @@
 
     tela.addEventListener('wheel', function (ev) {
       ev.preventDefault();
-      var fator = ev.deltaY < 0 ? 1.08 : 0.92;
-      var z = (vis.zoomCamera || 1.15) * fator;
-      vis.zoomCamera = Math.max(0.85, Math.min(1.75, z));
+      var fator = ev.deltaY < 0 ? 1.09 : 0.91;
+      var zAtual = vis.alvoZoom !== undefined ? vis.alvoZoom : (vis.zoomCamera || 1.08);
+      var novoZ = Math.max(0.68, Math.min(2.30, zAtual * fator));
+      vis.zoomCamera = novoZ;
+      vis.alvoZoom = novoZ;
+      avisar('Zoom: ' + Math.round(novoZ * 100) + '%');
     }, { passive: false });
 
     // Botões de enquadramento rápido nas retas estratégicas do mapa
