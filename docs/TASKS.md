@@ -31,6 +31,8 @@
 | T21 | Barra de volume contínua, rotação/alinhamento de câmera e fidelidade histórica | Antigravity | concluída | T18, T20 | Controle deslizante contínuo de 0 a 100% com persistência e ícone dinâmico; câmera alinhada à rota perpendicular dos soldados (-26,5°) e rotação livre 360° no botão do meio do mouse (scroll drag / tecla R); riqueza histórica dos sprites (talabarte, quepe, baioneta Mauser, crucifixo de Conselheiro, chapéu de couro meia-lua) e VFX atmosférico de poeira da Caatinga. |
 | T22 | Paridade do Campeão Antônio Conselheiro no Godot 4.3 | Codex / Antigravity | concluída | T11, T13, T14, T15 | `ChampionConselheiro` implementado em `scenes/champion/champion_conselheiro.tscn` com aura tática (192px), buff de cadência (0.8x) em atiradores, cura de barricadas (+150 HP via Mutirão), redução de dano (50% via Prédica), controle no HUD inferior (`[3]`, `[Q]`, `[W]`), atalhos de teclado e testes em `tests/sim_onda.gd`. |
 | T23 | Áudio tátil avançado e sombras de projeção isométrica | Antigravity | concluída | T20, T21 | Síntese de novas assinaturas de áudio (Mutirão com sino de capela, Prédica com coro etéreo, Fanfarra de Vitória, Cadência de Derrota) e projeção de sombras elípticas de base suave em todas as estruturas. |
+| T24 | Paridade de Câmera 360°, Zoom, SFX e Floating Combat Text na Godot 4.3 | Antigravity / Codex | concluída | T21, T22 | `CameraPivot` e `Camera2D` com rotação livre 360° no botão do meio do mouse, zoom com a roda, botão de alinhamento perpendicular (-26,5°), 7 efeitos sonoros WAV sintetizados (`sfx_musket`, `sfx_impact`, `sfx_wave_horn`, `sfx_mutirao`, `sfx_predica`, `sfx_victory`, `sfx_defeat`), partículas ambientais `CaatingaDust`, tremor de tela e números flutuantes de dano e cura. |
+| T25 | Pintura e integração da Arte de Capa Canônica (`capa.jpg`) | Antigravity | concluída | T06, T16 | Criação da pintura de capa (1280x720) retratando o crepúsculo da Caatinga, a Igreja de Bom Jesus iluminada por velas, o Arraial de Canudos e Antônio Conselheiro com bordão e crucifixo. Integrada nos menus Web e PC. Recompilado `Canudos.exe`. |
 
 ### Notas da T15 (Antigravity)
 
@@ -68,6 +70,18 @@
 - **Áudio Tátil e Projeção Isométrica (T23):**
   - Adicionadas sínteses sonoras procedurais em Web Audio API para `mutirao` (ressonância de sino de capela com cauda harmônica de 3s), `predica` (ressonância vocal mística), `vitoria` (acorde maior triunfante em viola e pífano) e `derrota` (cadência menor sertaneja).
   - Adicionadas sombras elípticas de base suave (`rgba(0,0,0,0.28)`) sob todas as estruturas e barricadas, ancorando-as realisticamente no relevo da Caatinga.
+
+### Notas da T24 e T25 (Antigravity & Codex)
+
+- **Câmera 360°, Zoom, SFX e Floating Combat Text (T24):**
+  - Implementado `CameraPivot` centrado em (640, 352) e `Camera2D` em `scenes/map/map.tscn`. Suporte a rotação livre 360° no botão do meio do mouse, atalho `C` / botão no HUD para rotação perpendicular (-26,5°), reset com tecla `R`, zoom dinâmico na roda do mouse (0,75x a 1,8x).
+  - 7 arquivos WAV autênticos de efeitos sonoros sintetizados em 44.1kHz estéreo em `assets/audio/` e gerenciados por `AudioStreamPlayer` independentes no Godot: tiro de fuzil jagunço com fumaça e estalo (`sfx_musket`), impacto pesado de madeira (`sfx_impact`), toque de berrante sertanejo de início de onda (`sfx_wave_horn`), sino de mutirão (`sfx_mutirao`), coro sagrado da prédica (`sfx_predica`), fanfarra de vitória (`sfx_victory`) e toque fúnebre de derrota (`sfx_defeat`).
+  - Textos de combate flutuantes com interpolação suave (Tween): dano vermelho nos inimigos, perda de vida âmbar nas barricadas e cura verde vibrante no Mutirão.
+  - Partículas ambientais `CaatingaDust` flutuando no ar árido do Arraial e tremor de tela sutil em impactos severos.
+- **Arte de Capa Canônica de Belo Monte (T25):**
+  - Pintura digital (1280x720) do crepúsculo sertanejo com as serras ao fundo, o Arraial de Canudos, a Igreja de Bom Jesus iluminada por vigília de velas e Antônio Conselheiro em perfil com seu manto, crucifixo peitoral e bordão de jurema.
+  - Integrada em `Miguel/Canudos/capa.jpg` e `Miguel/Canudos_PC/jogo/capa.jpg`.
+  - Recompilado `Canudos.exe` com WebView2 para Windows nativo.
 
 ## Regras do quadro
 

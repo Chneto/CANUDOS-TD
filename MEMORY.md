@@ -104,6 +104,28 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - `derrota`: cadência menor melancólica sertaneja.
 * **Profundidade Visual:** Projeção procedural de sombras elípticas de base suave (`rgba(0,0,0,0.28)`) sob todas as estruturas e barricadas na renderização isométrica, eliminando o efeito de sprite "flutuante" sobre o terreno.
 
+### 1.13 Paridade Completa de Câmera 360°, Zoom, SFX e Floating Combat Text na Godot 4.3 (T24 — Resolvido)
+* **Arquitetura da Câmera:** Implementado nó `CameraPivot` centrado em `(640, 352)` contendo uma `Camera2D` em `(-640, -352)`.
+  - Permite rotação analítica suave em torno do centro do campo de batalha sem alterar o ponto de referência global (0,0) nos testes automatizados e em modo headless.
+  - Rotação 360° interativa com o botão do meio do mouse (scroll drag).
+  - Alinhamento perpendicular automático à rota central (-26,565° / -0,4636 rad) via botão no HUD ou tecla `C`.
+  - Restauração rápida para 0° com a tecla `R`.
+  - Zoom dinâmico com a roda do mouse (0,75x a 1,8x).
+* **Efeitos Sonoros Dedicados (SFX):** Síntese em 44.1kHz estéreo de 7 arquivos WAV autênticos em `assets/audio/`:
+  - `sfx_musket.wav`: tiro estalado de pólvora seca com eco de caatinga.
+  - `sfx_impact.wav`: impacto sólido em madeira de aroeira e taipa.
+  - `sfx_wave_horn.wav`: berrante rústico anunciando início do combate.
+  - `sfx_mutirao.wav`: sino de bronze de capela sertaneja.
+  - `sfx_predica.wav`: coro e acorde místico solene.
+  - `sfx_victory.wav`: fanfarra modal nordestina (Modo Mixolídio).
+  - `sfx_defeat.wav`: dobre fúnebre solene.
+* **Feedback Visual de Combate:** Textos flutuantes animados com `Tween` indicando valores de dano em vermelho (-10) e cura de barricada em verde (+150 HP), além de partículas atmosféricas de poeira da Caatinga (`CaatingaDust`).
+
+### 1.14 Arte Canônica de Capa e Menu de Canudos (T25 — Resolvido)
+* **Pintura Digital de Capa (`capa.jpg`):** Criada em alta definição (1280x720) retratando o crepúsculo sobre a Caatinga e as Serras de Monte Santo, com a Igreja de Bom Jesus iluminada por vigília de velas, o casario de taipa do Arraial e a silhueta profética de Antônio Conselheiro.
+* **Eliminação de Erros de Rede:** A imagem soluciona o erro 404 anteriormente reportado no console do jogo web/PC, enriquecendo o menu de abertura.
+* **Compilação Nativa:** Recompilado `Miguel/Canudos_PC/Canudos.exe` via WebView2 com os novos assets e comportamentos.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
@@ -132,5 +154,5 @@ node Miguel/Canudos/testes/campanha.js
 ## 3. Estado Atual das Tarefas (Marcos 0 e 1 Concluídos)
 
 * **T01 a T06 (Marco 0 — Fundação):** Todas 100% concluídas.
-* **T10 a T23 (Marco 1 — Ciclo Jogável & Polish):** Todas 100% concluídas e testadas.
+* **T10 a T25 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual):** Todas 100% concluídas e testadas.
 * **Próximo Marco:** Marco 2 — Progressão, Fases da Campanha (1ª a 4ª Expedição) e Artilharia/Morteros históricos.

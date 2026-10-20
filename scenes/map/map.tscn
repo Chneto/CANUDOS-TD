@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scenes/map/map.gd" id="1_map_script"]
 [ext_resource type="Resource" path="res://resources/maps/canudos_mvp.tres" id="2_map_def"]
@@ -13,6 +13,13 @@
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_barricade.tscn" id="11_barricade_scene"]
 [ext_resource type="AudioStream" path="res://assets/audio/music_caatinga_resistencia.wav" id="12_bgm"]
 [ext_resource type="PackedScene" path="res://scenes/champion/champion_conselheiro.tscn" id="13_champion_scene"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_musket.wav" id="14_sfx_musket"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_impact.wav" id="15_sfx_impact"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_wave_horn.wav" id="16_sfx_horn"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_mutirao.wav" id="17_sfx_mutirao"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_predica.wav" id="18_sfx_predica"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_victory.wav" id="19_sfx_victory"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx_defeat.wav" id="20_sfx_defeat"]
 
 [sub_resource type="Curve2D" id="Curve2D_path"]
 _data = {
@@ -58,6 +65,29 @@ map_definition = ExtResource("2_map_def")
 shooter_definition = ExtResource("3_sniper_def")
 barricade_definition = ExtResource("4_barricade_def")
 
+[node name="CameraPivot" type="Node2D" parent="."]
+position = Vector2(640, 352)
+
+[node name="Camera2D" type="Camera2D" parent="CameraPivot"]
+position = Vector2(-640, -352)
+anchor_mode = 0
+
+[node name="CaatingaDust" type="CPUParticles2D" parent="."]
+position = Vector2(640, 352)
+amount = 24
+lifetime = 6.0
+preprocess = 3.0
+emission_shape = 3
+emission_rect_extents = Vector2(640, 360)
+direction = Vector2(-1, 0.3)
+spread = 25.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 12.0
+initial_velocity_max = 28.0
+scale_amount_min = 1.5
+scale_amount_max = 3.5
+color = Color(0.85, 0.72, 0.48, 0.2)
+
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("5_gm_script")
 
@@ -87,16 +117,16 @@ barricade_scene = ExtResource("11_barricade_scene")
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -440.0
+offset_left = -490.0
 offset_top = 8.0
-offset_right = 440.0
+offset_right = 490.0
 offset_bottom = 48.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_top")
 
 [node name="HBox" type="HBoxContainer" parent="UI/PanelTop"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="LabelPhase" type="Label" parent="UI/PanelTop/HBox"]
 layout_mode = 2
@@ -118,12 +148,16 @@ text = "Inimigos: 0"
 layout_mode = 2
 text = " Iniciar Combate "
 
+[node name="BtnCamera" type="Button" parent="UI/PanelTop/HBox"]
+layout_mode = 2
+text = " 📷 Câmera "
+
 [node name="LabelVolume" type="Label" parent="UI/PanelTop/HBox"]
 layout_mode = 2
 text = "Vol:"
 
 [node name="SliderVolume" type="HSlider" parent="UI/PanelTop/HBox"]
-custom_minimum_size = Vector2(80, 0)
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 size_flags_vertical = 4
 min_value = 0.0
@@ -175,7 +209,7 @@ layout_mode = 2
 text = "Selecione uma estrutura para construir ou inicie o combate."
 
 
-[node name="ChampionConselheiro" parent="." node_paths=PackedStringArray("map_definition", "game_manager") instance=ExtResource("13_champion_scene")]
+[node name="ChampionConselheiro" parent="." node_paths=PackedStringArray("game_manager") instance=ExtResource("13_champion_scene")]
 position = Vector2(1088, 416)
 map_definition = ExtResource("2_map_def")
 game_manager = NodePath("../GameManager")
@@ -184,3 +218,31 @@ game_manager = NodePath("../GameManager")
 stream = ExtResource("12_bgm")
 autoplay = true
 volume_db = -5.0
+
+[node name="SFXMusket" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("14_sfx_musket")
+volume_db = -4.0
+
+[node name="SFXImpact" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("15_sfx_impact")
+volume_db = -3.0
+
+[node name="SFXWaveHorn" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("16_sfx_horn")
+volume_db = -2.0
+
+[node name="SFXMutirao" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("17_sfx_mutirao")
+volume_db = -2.0
+
+[node name="SFXPredica" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("18_sfx_predica")
+volume_db = -2.0
+
+[node name="SFXVictory" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("19_sfx_victory")
+volume_db = -1.0
+
+[node name="SFXDefeat" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("20_sfx_defeat")
+volume_db = -1.0

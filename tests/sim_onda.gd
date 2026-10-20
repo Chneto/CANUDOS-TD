@@ -213,7 +213,7 @@ func _teste_campeao_conselheiro() -> void:
 
 	var ok_move := map.champion.move_to_cell(Vector2i(10, 5))
 	_check(ok_move, "Conselheiro aceita mover para célula fora da estrada")
-	_check(not map.champion.move_to_cell(Vector2i(4, 1)), "Conselheiro recusa mover para a estrada")
+	_check(not map.champion.move_to_cell(Vector2i(2, 1)), "Conselheiro recusa mover para a estrada")
 
 	var st := map.placement_manager.place_structure(map.barricade_definition, Vector2i(4, 2))
 	if st is Barricade:

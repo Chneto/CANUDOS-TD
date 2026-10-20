@@ -52,9 +52,21 @@ var hover_is_valid: bool = false
 @onready var lbl_materials: Label = $UI/PanelTop/HBox/LabelMaterials
 @onready var lbl_enemies: Label = $UI/PanelTop/HBox/LabelEnemies
 @onready var btn_wave: Button = $UI/PanelTop/HBox/BtnStartWave
+@onready var btn_camera: Button = $UI/PanelTop/HBox/BtnCamera
 @onready var btn_restart: Button = $UI/PanelTop/HBox/BtnRestart
 @onready var slider_volume: HSlider = $UI/PanelTop/HBox/SliderVolume
 @onready var music_player: AudioStreamPlayer = $MusicPlayer
+
+# SFX Players
+@onready var sfx_musket: AudioStreamPlayer = $SFXMusket
+@onready var sfx_impact: AudioStreamPlayer = $SFXImpact
+@onready var sfx_horn: AudioStreamPlayer = $SFXWaveHorn
+@onready var sfx_mutirao: AudioStreamPlayer = $SFXMutirao
+@onready var sfx_predica: AudioStreamPlayer = $SFXPredica
+@onready var sfx_victory: AudioStreamPlayer = $SFXVictory
+@onready var sfx_defeat: AudioStreamPlayer = $SFXDefeat
+
+# Bottom HUD references
 @onready var btn_sniper: Button = $UI/PanelBottom/HBox/BtnBuildSniper
 @onready var btn_barricade: Button = $UI/PanelBottom/HBox/BtnBuildBarricade
 @onready var btn_champion: Button = $UI/PanelBottom/HBox/BtnChampion
@@ -62,6 +74,16 @@ var hover_is_valid: bool = false
 @onready var btn_predica: Button = $UI/PanelBottom/HBox/BtnPredica
 @onready var lbl_status: Label = $UI/PanelBottom/HBox/LabelStatus
 @onready var champion: ChampionConselheiro = $ChampionConselheiro
+
+# Camera references and states
+@onready var camera_pivot: Node2D = $CameraPivot
+@onready var camera: Camera2D = $CameraPivot/Camera2D
+const ALIGNED_CAMERA_ANGLE: float = -0.4636476 # -26.565 graus alinhado à trajetória retangular
+var is_camera_aligned: bool = false
+var _middle_dragging: bool = false
+var _last_drag_pos: Vector2 = Vector2.ZERO
+var _shake_timer: float = 0.0
+var _shake_strength: float = 0.0
 
 var champion_selected: bool = false
 
@@ -71,12 +93,21 @@ func _ready() -> void:
 		push_error("MapScene requer map_definition atribuído!")
 		return
 
+	if champion != null:
+		if champion.map_definition == null:
+			champion.map_definition = map_definition
+		if champion.game_manager == null:
+			champion.game_manager = game_manager
+
 	# Wire GameManager signals
 	game_manager.phase_changed.connect(_on_phase_changed)
 	game_manager.objective_health_changed.connect(_on_health_changed)
 	game_manager.materials_changed.connect(_on_materials_changed)
 	game_manager.enemies_alive_changed.connect(_on_enemies_changed)
 	game_manager.run_finished.connect(_on_run_finished)
+
+	# Wire WaveManager signals
+	wave_manager.enemy_spawned.connect(_on_enemy_spawned)
 
 	# Wire PlacementManager structure placed
 	placement_manager.structure_placed.connect(_on_structure_placed)
@@ -86,6 +117,8 @@ func _ready() -> void:
 	btn_restart.pressed.connect(_on_restart_pressed)
 	btn_sniper.pressed.connect(_on_select_sniper_pressed)
 	btn_barricade.pressed.connect(_on_select_barricade_pressed)
+	if btn_camera:
+		btn_camera.pressed.connect(_on_camera_pressed)
 	if btn_champion:
 		btn_champion.pressed.connect(_on_select_champion_pressed)
 	if btn_mutirao:
@@ -103,10 +136,19 @@ func _ready() -> void:
 	queue_redraw()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	# Atualiza a prévia de alcance e barras de vida durante a onda
 	if game_manager.phase == GameManager.Phase.WAVE_ACTIVE:
 		queue_redraw()
+
+	# Processa tremor suave de câmera
+	if _shake_timer > 0.0:
+		_shake_timer -= delta
+		if camera != null:
+			var offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _shake_strength
+			camera.position = Vector2(-640, -352) + offset
+		if _shake_timer <= 0.0 and camera != null:
+			camera.position = Vector2(-640, -352)
 
 	# Atualiza rótulos e estado das habilidades do Conselheiro
 	if champion != null:
@@ -131,7 +173,27 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
+	# 1. Rotação e Zoom de Câmera interativos
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			_middle_dragging = event.pressed
+			_last_drag_pos = event.position
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_zoom_camera(1.08)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_zoom_camera(0.92)
+
+	elif event is InputEventMouseMotion and _middle_dragging:
+		var delta_x: float = event.position.x - _last_drag_pos.x
+		if camera_pivot != null:
+			camera_pivot.rotation += delta_x * 0.005
+			if btn_camera:
+				btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(camera_pivot.rotation)
+		_last_drag_pos = event.position
+		queue_redraw()
+
+	# 2. Hover e Posicionamento
+	if event is InputEventMouseMotion and not _middle_dragging:
 		var cell := _screen_to_cell(event.position)
 		if cell != current_hover_cell:
 			current_hover_cell = cell
@@ -177,6 +239,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			lbl_status.text = "Seleção cancelada."
 			queue_redraw()
 
+	# 3. Atalhos de Teclado
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_1:
 			_on_select_barricade_pressed()
@@ -188,6 +251,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_use_mutirao_pressed()
 		elif event.keycode == KEY_W:
 			_on_use_predica_pressed()
+		elif event.keycode == KEY_C:
+			_on_camera_pressed()
+		elif event.keycode == KEY_R:
+			_reset_camera()
 		elif event.keycode == KEY_ESCAPE:
 			active_build_definition = null
 			champion_selected = false
@@ -250,9 +317,10 @@ func _draw() -> void:
 		draw_texture_rect(TEX_HOUSE, house_rect, false)
 
 	# 5. Desenhar a Igreja de Canudos (Objetivo Principal)
-	# Células de (14,9) a (17,10) -> Centro do objetivo
 	var church_pos := Vector2(13.5 * cell_size, 8.0 * cell_size)
 	var church_size := Vector2(cell_size * 4.5, cell_size * 3.5)
+	# Sombra suave da Igreja
+	draw_ellipse(church_pos + Vector2(church_size.x * 0.5, church_size.y * 0.9), church_size.x * 0.45, church_size.y * 0.2, Color(0, 0, 0, 0.35))
 	draw_texture_rect(TEX_CHURCH, Rect2(church_pos, church_size), false)
 
 	# Barra de vida estilizada flutuando sobre a Igreja
@@ -266,16 +334,19 @@ func _draw() -> void:
 	draw_rect(Rect2(ch_rect.position, Vector2(ch_bar_w * ch_ratio, ch_bar_h)), ch_color, true)
 	draw_rect(ch_rect, Color(0.6, 0.45, 0.25, 0.8), false, 1.0)
 
-	# 4. Indicador de alcance das torres posicionadas (ao passar o mouse por perto)
+	# 6. Indicador de alcance das torres posicionadas e sombras de base
 	var mouse_pos := get_local_mouse_position()
 	for child in placement_manager.get_children():
 		if child is DefenseStructure and is_instance_valid(child):
+			# Sombra de base sob atirador
+			draw_ellipse(child.position + Vector2(0, 4), 22.0, 10.0, Color(0, 0, 0, 0.28))
 			if mouse_pos.distance_to(child.position) < cell_size * 2.0:
 				draw_circle(child.position, child.definition.attack_range_px, Color(0.2, 0.7, 1.0, 0.06))
 				draw_arc(child.position, child.definition.attack_range_px, 0.0, TAU, 48, Color(0.3, 0.8, 1.0, 0.4), 1.5)
 
-		# Barra de vida das barricadas danificadas
+		# Barra de vida e sombra das barricadas
 		elif child is Barricade and is_instance_valid(child) and not child.is_destroyed():
+			draw_ellipse(child.position + Vector2(0, 8), 26.0, 12.0, Color(0, 0, 0, 0.32))
 			if child.health < child.definition.max_health:
 				var bar_w := 48.0
 				var bar_h := 4.0
@@ -285,7 +356,7 @@ func _draw() -> void:
 				draw_rect(Rect2(b_rect.position, Vector2(bar_w * b_ratio, bar_h)), Color(0.2, 0.85, 0.3), true)
 				draw_rect(b_rect, Color(0.5, 0.35, 0.2), false, 1.0)
 
-	# 5. Desenhar prévia de posicionamento do mouse e círculo de alcance
+	# 7. Desenhar prévia de posicionamento do mouse e círculo de alcance
 	if active_build_definition != null and map_definition.is_in_bounds(current_hover_cell):
 		var site := placement_manager._find_matching_site(active_build_definition, current_hover_cell)
 		var cells := placement_manager._cells_for_placement(active_build_definition, current_hover_cell, site)
@@ -308,8 +379,13 @@ func _draw() -> void:
 
 
 func _screen_to_cell(pos: Vector2) -> Vector2i:
-	var cs := map_definition.cell_size_px
-	return Vector2i(int(pos.x / cs), int(pos.y / cs))
+	if map_definition == null:
+		return Vector2i(-1, -1)
+	var cs := float(map_definition.cell_size_px)
+	var p := pos
+	if DisplayServer.get_name() != "headless":
+		p = get_global_mouse_position()
+	return Vector2i(int(floor(p.x / cs)), int(floor(p.y / cs)))
 
 
 func _update_hud() -> void:
@@ -341,12 +417,52 @@ func _update_hud() -> void:
 func _on_structure_placed(structure: Node2D, _def: StructureDefinition, _cells: Array[Vector2i]) -> void:
 	if structure is DefenseStructure:
 		structure.attack_fired.connect(_on_defense_attack_fired.bind(structure))
+	elif structure is Barricade:
+		structure.damaged.connect(_on_barricade_damaged.bind(structure))
 
 
 func _on_defense_attack_fired(target: Enemy, shooter: DefenseStructure) -> void:
 	if not is_instance_valid(shooter) or not is_instance_valid(target):
 		return
+	_play_sfx(sfx_musket)
 	_spawn_muzzle_and_tracer(shooter.global_position + Vector2(0, -28), target.global_position + Vector2(0, -24))
+
+
+func _on_barricade_damaged(amount: float, barricade: Barricade) -> void:
+	if not is_instance_valid(barricade):
+		return
+	_play_sfx(sfx_impact)
+	_shake_camera(2.5, 0.12)
+	_spawn_floating_text(barricade.global_position + Vector2(0, -24), "-%.0f HP" % amount, Color(1.0, 0.65, 0.3))
+
+
+func _on_enemy_spawned(enemy: Enemy) -> void:
+	if is_instance_valid(enemy):
+		enemy.damaged.connect(_on_enemy_damaged.bind(enemy))
+
+
+func _on_enemy_damaged(amount: float, enemy: Enemy) -> void:
+	if is_instance_valid(enemy):
+		_spawn_floating_text(enemy.global_position + Vector2(0, -32), "-%.0f" % amount, Color(1.0, 0.3, 0.25))
+
+
+func _spawn_floating_text(world_pos: Vector2, text: String, color: Color) -> void:
+	var label := Label.new()
+	label.text = text
+	label.position = world_pos + Vector2(-20, -10)
+	label.modulate = color
+	label.add_theme_font_size_override("font_size", 13)
+	add_child(label)
+
+	var tw := create_tween()
+	tw.parallel().tween_property(label, "position:y", world_pos.y - 32.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.55).set_delay(0.15)
+	tw.tween_callback(label.queue_free)
+
+
+func _shake_camera(strength: float, duration: float) -> void:
+	_shake_strength = strength
+	_shake_timer = duration
 
 
 func _spawn_muzzle_and_tracer(from_pos: Vector2, to_pos: Vector2) -> void:
@@ -388,6 +504,7 @@ func _spawn_muzzle_and_tracer(from_pos: Vector2, to_pos: Vector2) -> void:
 func _on_start_wave_pressed() -> void:
 	active_build_definition = null
 	if wave_manager.start_wave():
+		_play_sfx(sfx_horn)
 		lbl_status.text = "Onda iniciada! O Exército Republicano avança pela caatinga."
 	else:
 		lbl_status.text = "Não foi possível iniciar a onda."
@@ -431,17 +548,57 @@ func _on_enemies_changed(_cur: int) -> void:
 func _on_run_finished(won: bool) -> void:
 	_update_hud()
 	if won:
+		_play_sfx(sfx_victory)
 		lbl_status.text = "VITÓRIA! O Arraial de Canudos resistiu à primeira expedição!"
 	else:
+		_play_sfx(sfx_defeat)
 		lbl_status.text = "DERROTA! A Igreja de Bom Jesus foi tomada pelas forças republicanas."
 
 
+func _on_camera_pressed() -> void:
+	is_camera_aligned = not is_camera_aligned
+	var target_rot := ALIGNED_CAMERA_ANGLE if is_camera_aligned else 0.0
+	if camera_pivot != null:
+		var tw := create_tween()
+		tw.tween_property(camera_pivot, "rotation", target_rot, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	if btn_camera != null:
+		btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(target_rot)
+	lbl_status.text = "Câmera %s (Arraste com botão do meio do mouse para girar 360°, ou use a roda para zoom)" % ["alinhada à rota" if is_camera_aligned else "padrão"]
+	queue_redraw()
+
+
+func _reset_camera() -> void:
+	is_camera_aligned = false
+	if camera_pivot != null:
+		camera_pivot.rotation = 0.0
+	if camera != null:
+		camera.zoom = Vector2(1.0, 1.0)
+	if btn_camera != null:
+		btn_camera.text = " 📷 Câmera (0°) "
+	lbl_status.text = "Câmera restaurada para visão padrão (0°)."
+	queue_redraw()
+
+
+func _zoom_camera(factor: float) -> void:
+	if camera != null:
+		var new_z := clampf(camera.zoom.x * factor, 0.75, 1.8)
+		camera.zoom = Vector2(new_z, new_z)
+		queue_redraw()
+
+
 func _on_volume_changed(val: float) -> void:
+	var db := -80.0 if val <= 0.0 else linear_to_db(val / 100.0)
 	if music_player:
-		if val <= 0.0:
-			music_player.volume_db = -80.0
-		else:
-			music_player.volume_db = linear_to_db(val / 100.0)
+		music_player.volume_db = db - 4.0
+	var sfx_list: Array[AudioStreamPlayer] = [sfx_musket, sfx_impact, sfx_horn, sfx_mutirao, sfx_predica, sfx_victory, sfx_defeat]
+	for sfx in sfx_list:
+		if sfx != null:
+			sfx.volume_db = db
+
+
+func _play_sfx(player: AudioStreamPlayer) -> void:
+	if player != null and is_instance_valid(player) and DisplayServer.get_name() != "headless":
+		player.play()
 
 
 func _on_select_champion_pressed() -> void:
@@ -455,6 +612,8 @@ func _on_use_mutirao_pressed() -> void:
 	if champion != null:
 		var res := champion.use_mutirao()
 		if res["ok"]:
+			_play_sfx(sfx_mutirao)
+			_spawn_floating_text(champion.global_position + Vector2(0, -40), "+150 HP Mutirão!", Color(0.3, 1.0, 0.4))
 			lbl_status.text = "Mutirão concluído! %d barricada(s) reparada(s)." % res["repaired"]
 		else:
 			lbl_status.text = res["reason"]
@@ -464,6 +623,8 @@ func _on_use_predica_pressed() -> void:
 	if champion != null:
 		var res := champion.use_predica()
 		if res["ok"]:
+			_play_sfx(sfx_predica)
+			_spawn_floating_text(champion.global_position + Vector2(0, -40), "Prédica da Fé (-50% dano)", Color(0.4, 0.8, 1.0))
 			lbl_status.text = "Prédica iniciada! Barricadas próximas sofrem metade do dano por %.0fs." % res["duration"]
 		else:
 			lbl_status.text = res["reason"]

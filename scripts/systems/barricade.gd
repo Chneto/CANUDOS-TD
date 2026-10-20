@@ -2,6 +2,7 @@ class_name Barricade
 extends Node2D
 
 signal health_changed(current: float, maximum: float)
+signal damaged(amount: float)
 signal destroyed(site_id: StringName)
 
 var definition: StructureDefinition
@@ -43,6 +44,7 @@ func take_damage(amount: float) -> void:
 
 	health = maxf(0.0, health - final_damage)
 	health_changed.emit(health, definition.max_health)
+	damaged.emit(final_damage)
 	_play_hit_shake()
 
 	if health <= 0.0:

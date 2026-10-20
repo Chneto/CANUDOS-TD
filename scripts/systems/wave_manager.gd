@@ -4,6 +4,7 @@ extends Node
 signal wave_started(wave_number: int)
 signal spawn_count_changed(spawned: int, total: int)
 signal wave_spawning_finished
+signal enemy_spawned(enemy: Enemy)
 
 @export var game_manager: GameManager
 @export var map_definition: MapDefinition
@@ -66,6 +67,7 @@ func _spawn_next_enemy() -> void:
 		_timer.stop()
 		return
 	path_node.add_child(enemy)
+	enemy_spawned.emit(enemy)
 	_spawned_count += 1
 	spawn_count_changed.emit(_spawned_count, enemies_in_wave)
 

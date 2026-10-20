@@ -26,6 +26,15 @@ func is_in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < grid_size.x and cell.y < grid_size.y
 
 
+func is_inside_grid(cell: Vector2i) -> bool:
+	return is_in_bounds(cell)
+
+
+func is_road(cell: Vector2i) -> bool:
+	var t := cell_type_at(cell)
+	return t == CellType.PATH or t == CellType.SPAWN
+
+
 func cell_type_at(cell: Vector2i) -> int:
 	if not is_in_bounds(cell):
 		return -1
@@ -37,6 +46,10 @@ func cell_type_at(cell: Vector2i) -> int:
 
 func cell_center(cell: Vector2i) -> Vector2:
 	return Vector2((cell.x + 0.5) * cell_size_px, (cell.y + 0.5) * cell_size_px)
+
+
+func cell_to_world_center(cell: Vector2i) -> Vector2:
+	return cell_center(cell)
 
 
 func barricade_site_for_cells(cells: Array[Vector2i]) -> BuildSiteDefinition:

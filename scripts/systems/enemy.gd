@@ -2,6 +2,7 @@ class_name Enemy
 extends PathFollow2D
 
 signal health_changed(current: float, maximum: float)
+signal damaged(amount: float)
 signal removed_from_wave(enemy: Enemy)
 
 enum State {
@@ -66,6 +67,7 @@ func take_damage(amount: float) -> void:
 
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, definition.max_health)
+	damaged.emit(amount)
 	_play_hit_feedback()
 
 	if health <= 0.0:
