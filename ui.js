@@ -509,6 +509,13 @@
     ultimo = agora;
     if (naTela === 'jogo') {
       avancar(dt);
+
+      // Interpolação suave e cinematográfica de câmera (Pan, Zoom, Rotação)
+      if (vis.alvoPanX !== undefined) vis.cameraPanX = (vis.cameraPanX || 0) + (vis.alvoPanX - (vis.cameraPanX || 0)) * Math.min(1, dt * 9);
+      if (vis.alvoPanY !== undefined) vis.cameraPanY = (vis.cameraPanY || 0) + (vis.alvoPanY - (vis.cameraPanY || 0)) * Math.min(1, dt * 9);
+      if (vis.alvoRotacao !== undefined) vis.rotacaoCamera = (vis.rotacaoCamera || 0) + (vis.alvoRotacao - (vis.rotacaoCamera || 0)) * Math.min(1, dt * 7);
+      if (vis.alvoZoom !== undefined) vis.zoomCamera = (vis.zoomCamera || 1.08) + (vis.alvoZoom - (vis.zoomCamera || 1.08)) * Math.min(1, dt * 7);
+
       R.desenhar(ctx, jogo, vis, cena, dpr, { pausado: pausado && jogo.s.fase === 'combate' });
       atualizarInterface();
     }
@@ -595,9 +602,11 @@
     var zoom = Math.max(0.85, Math.min(1.75, (vis && vis.zoomCamera) || 1.08));
     var cx = cena.P.L / 2;
     var cy = cena.P.A / 2;
+    var panX = (vis && vis.cameraPanX) || 0;
+    var panY = (vis && vis.cameraPanY) || 0;
 
-    var dx = (sx - cx) / zoom;
-    var dy = (sy - cy) / zoom;
+    var dx = (sx - (cx + panX)) / zoom;
+    var dy = (sy - (cy + panY)) / zoom;
 
     var cos = Math.cos(-rot);
     var sin = Math.sin(-rot);
@@ -613,12 +622,58 @@
     if (!r.ok) vis.recusa = { x: (c.cx + 0.5) * D.celula, y: (c.cy + 0.5) * D.celula, motivo: r.motivo, t: 1.6 };
   }
 
+  function focarSetor(nome) {
+    var cx = cena.P.L / 2, cy = cena.P.A / 2;
+    document.querySelectorAll('.bt-foco').forEach(function (b) {
+      b.classList.toggle('ativo', b.dataset.foco === nome);
+    });
+    if (nome === 'geral') {
+      vis.alvoPanX = 0;
+      vis.alvoPanY = 0;
+      vis.alvoRotacao = 0;
+      vis.alvoZoom = 1.08;
+      avisar('Câmera: Visão Geral de Canudos');
+    } else if (nome === 'entrada') {
+      // Reta 1: Descida da Serra (norte/oeste do mapa)
+      var pE = cena.P.p(1.5 * D.celula, 1.5 * D.celula);
+      vis.alvoPanX = cx - pE.x;
+      vis.alvoPanY = cy - pE.y + 35;
+      vis.alvoRotacao = -0.15;
+      vis.alvoZoom = 1.35;
+      avisar('Câmera: 1. Entrada da Serra (Descida)');
+    } else if (nome === 'reta') {
+      // Reta 2: Reta Central das Barricadas (alinhada e paralela à tela)
+      var pR = cena.P.p(8.5 * D.celula, 5.5 * D.celula);
+      vis.alvoPanX = cx - pR.x;
+      vis.alvoPanY = cy - pR.y;
+      vis.alvoRotacao = -0.4636; // -26.5° perfeitamente alinhada
+      vis.alvoZoom = 1.30;
+      avisar('Câmera: 2. Reta Central das Barricadas (Alinhada)');
+    } else if (nome === 'igreja') {
+      // Reta 3: Arraial e Igreja de Bom Jesus
+      var pI = cena.P.p(15.5 * D.celula, 7.5 * D.celula);
+      vis.alvoPanX = cx - pI.x;
+      vis.alvoPanY = cy - pI.y;
+      vis.alvoRotacao = 0;
+      vis.alvoZoom = 1.35;
+      avisar('Câmera: 3. Igreja de Bom Jesus e Arraial');
+    }
+    var btc = $('bt-camera');
+    if (btc) {
+      var rotExib = (vis.alvoRotacao !== undefined ? vis.alvoRotacao : vis.rotacaoCamera || 0);
+      btc.textContent = '🎥 ' + (rotExib < -0.3 ? 'Alinhada' : rotExib > 0.3 ? 'Flanco' : 'Clássica');
+    }
+  }
+
   function ligarEntrada() {
     var arrastandoCamera = false;
     var camMouseX = 0, camMouseY = 0;
+    var arrastandoPan = false;
+    var panMouseX = 0, panMouseY = 0;
+    var panArrastou = false;
 
     tela.addEventListener('pointerdown', function (ev) {
-      if (ev.button === 1) { // Clique do meio (scroll): rotação livre da câmera 360°
+      if (ev.button === 1) { // Clique do meio (scroll): rotação orbital cônica
         ev.preventDefault();
         arrastandoCamera = true;
         camMouseX = ev.clientX;
@@ -626,12 +681,16 @@
         try { tela.setPointerCapture(ev.pointerId); } catch (e) {}
         return;
       }
-      var p = pontoNaTela(ev), c = R.celulaNaTela(cena, p.x, p.y);
-      if (ev.button === 2) {
-        if (vis.selecionada === 'campeao' && !vis.ferramenta && !fimDeJogo()) mandarAndar(c);
-        else cancelar(false);
+      if (ev.button === 2) { // Botão direito: arrastar para Pan ou clique para cancelar/andar
+        ev.preventDefault();
+        arrastandoPan = true;
+        panMouseX = ev.clientX;
+        panMouseY = ev.clientY;
+        panArrastou = false;
+        try { tela.setPointerCapture(ev.pointerId); } catch (e) {}
         return;
       }
+      var p = pontoNaTela(ev), c = R.celulaNaTela(cena, p.x, p.y);
       if (ev.button !== 0 || fimDeJogo()) return;
       var toque = ev.pointerType !== 'mouse';
       var mesma = vis.hover && vis.hover.cx === c.cx && vis.hover.cy === c.cy;
@@ -669,19 +728,33 @@
         var dx = ev.clientX - camMouseX;
         var dy = ev.clientY - camMouseY;
         var rotAtual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : 0;
-        // Rotação orbital cônica/funil: amplitude limitada (-36° a +36°) para que o mundo NUNCA fique de cabeça para baixo
         var novaRot = Math.max(-0.628, Math.min(0.628, rotAtual + dx * 0.0035));
         vis.rotacaoCamera = novaRot;
+        vis.alvoRotacao = novaRot;
 
-        // Variação suave de elevação/zoom no eixo vertical (funil)
-        var zoomAtual = vis.zoomCamera || 1.15;
-        vis.zoomCamera = Math.max(0.85, Math.min(1.7, zoomAtual - dy * 0.002));
+        var zoomAtual = vis.zoomCamera || 1.08;
+        var novoZ = Math.max(0.85, Math.min(1.75, zoomAtual - dy * 0.002));
+        vis.zoomCamera = novoZ;
+        vis.alvoZoom = novoZ;
 
         camMouseX = ev.clientX;
         camMouseY = ev.clientY;
 
         var btc = $('bt-camera');
         if (btc) btc.textContent = '🎥 ' + Math.round(novaRot * 180 / Math.PI) + '°';
+        return;
+      }
+
+      if (arrastandoPan) {
+        var dxPan = ev.clientX - panMouseX;
+        var dyPan = ev.clientY - panMouseY;
+        if (Math.hypot(dxPan, dyPan) > 3) panArrastou = true;
+        vis.cameraPanX = (vis.cameraPanX || 0) + dxPan * 1.3;
+        vis.cameraPanY = (vis.cameraPanY || 0) + dyPan * 1.3;
+        vis.alvoPanX = vis.cameraPanX;
+        vis.alvoPanY = vis.cameraPanY;
+        panMouseX = ev.clientX;
+        panMouseY = ev.clientY;
         return;
       }
 
@@ -697,6 +770,16 @@
         arrastandoCamera = false;
         try { tela.releasePointerCapture(ev.pointerId); } catch (e) {}
       }
+      if (arrastandoPan) {
+        arrastandoPan = false;
+        try { tela.releasePointerCapture(ev.pointerId); } catch (e) {}
+        if (!panArrastou) {
+          // Clique simples com botão direito sem arrasto: executa ação de cancelar ou andar
+          var p = pontoNaTela(ev), c = R.celulaNaTela(cena, p.x, p.y);
+          if (vis.selecionada === 'campeao' && !vis.ferramenta && !fimDeJogo()) mandarAndar(c);
+          else cancelar(false);
+        }
+      }
     });
 
     tela.addEventListener('pointerleave', function () {
@@ -711,6 +794,11 @@
       var z = (vis.zoomCamera || 1.15) * fator;
       vis.zoomCamera = Math.max(0.85, Math.min(1.75, z));
     }, { passive: false });
+
+    // Botões de enquadramento rápido nas retas estratégicas do mapa
+    document.querySelectorAll('.bt-foco').forEach(function (b) {
+      b.addEventListener('click', function () { focarSetor(b.dataset.foco); });
+    });
 
     document.querySelectorAll('.ferramenta').forEach(function (b) {
       b.addEventListener('click', function () { escolherFerramenta(b.dataset.tipo); });
