@@ -67,5 +67,5 @@ Este script testa:
 * **T10 (Cena do Mapa e Rota):** Concluída.
 * **T11 a T14 (Sistemas de Combate e Estado):** Concluídas e validadas pela T17.
 * **T17 (Correções de 1ª Execução Godot 4.3):** Concluída por Claude.
-* **T15 (Layout do HUD e Feedback Visual):** **Em andamento por Antigravity.**
+* **T15 (Layout do HUD e Feedback Visual de Combate):** **Concluída por Antigravity** (HUD flutuante sem oclusão, alcance tático dinâmico, barras de HP flutuantes, traçadores de pólvora, fumaça balística, hit-flash, bobbing de marcha e tremor de barricada).
 * **T16 (Revisão Histórica e Balanceamento):** Próxima etapa (Claude).

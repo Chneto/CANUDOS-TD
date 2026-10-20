@@ -29,7 +29,14 @@
 ### Notas da T15 (Antigravity)
 
 - **Oclusão resolvida:** O HUD foi refatorado de barras de tela inteira para cartões flutuantes táticos com cantos arredondados e estética rústica de couro/taipa (`PanelTop` centralizado no topo; `PanelBottom` ancorado no canto inferior esquerdo). A Igreja de Canudos (colunas 14-17) e o ponto de surgimento (colunas 0-1) agora estão 100% visíveis e desobstruídos.
-- **Feedback visual adicionado:** Círculo de alcance tático dinâmico (220 px) ao posicionar atiradores ou passar o mouse sobre atiradores já colocados; barras de vida sobre barricadas danificadas e sobre a Igreja de Bom Jesus.
+- **Feedback visual e de combate adicionados (Frente 1):**
+  - Traçadores de tiro de pólvora com fade rápido (`Line2D`) e nuvem de fumaça de pólvora seca (`CPUParticles2D`) disparados a cada tiro de atirador jagunço.
+  - Hit-flash avermelhado nos soldados republicanos ao serem atingidos por tiros.
+  - Balanço procedural de marcha militar (bobbing vertical 2D) e golpe de baioneta (lunge) ao atacar barricadas.
+  - Flash de poeira de taipa e tremor horizontal sutil nas barricadas ao receberem impacto.
+  - Recuo de disparo (recoil) nas torres de defesa.
+  - Círculo de alcance tático dinâmico (220 px) ao posicionar atiradores ou passar o mouse sobre atiradores colocados.
+  - Barras de vida dinâmicas flutuando sobre barricadas danificadas e sobre a Igreja de Bom Jesus.
 - **Unificação de recursos:** As pastas duplicadas `resources/structures/` e `resources/enemies/` foram eliminadas; `resources/definitions/` foi formalizada como a única fonte canônica em `AGENTS.md` e `MEMORY.md`.
 - **Documentação Master criada:** `AGENTS.md`, `CONTEXT.md`, `ROADMAP.md` e `MEMORY.md` redigidos e sincronizados na raiz do projeto.
 
