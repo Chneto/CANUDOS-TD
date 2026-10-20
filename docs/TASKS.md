@@ -35,6 +35,7 @@
 | T25 | Pintura e integração da Arte de Capa Canônica (`capa.jpg`) | Antigravity | concluída | T06, T16 | Criação da pintura de capa (1280x720) retratando o crepúsculo da Caatinga, a Igreja de Bom Jesus iluminada por velas, o Arraial de Canudos e Antônio Conselheiro com bordão e crucifixo. Integrada nos menus Web e PC. Recompilado `Canudos.exe`. |
 | T26 | Câmera Orbital em Funil sem Inversão e Prévia Tática com Alcance | Antigravity / Codex | concluída | T21, T24 | Arco de rotação orbital limitado a [-36°, +36°] com zoom dinâmico de funil (0.85x a 1.75x) impedindo inversão de cabeça para baixo; círculo de alcance de 220px e sprite fantasma translúcido de atiradores e barricadas em tempo real durante hover. |
 | T27 | Overscan Circular, Sprites Direcionais 4 Ângulos e Foco Tático por Retas | Antigravity / Codex | concluída | T21, T26 | Eliminação de cantos cortados no giro via buffer circunscrito com overscan (MARGEM 240, BASE 480) e Caatinga contínua; Sprites direcionais em 4 ângulos cardeais (Frente/Sul, Perfil/Leste-Oeste, Costas/Norte) dinâmicos conforme rotação de câmera e vetor de marcha; Sistema de pan suave por arrasto com botão direito/WASD e 4 botões de enquadramento rápido no HUD ([Geral], [1. Entrada], [2. Reta Central], [3. Igreja]). |
+| T28 | Inclinação Vertical de Profundidade (Pitch 20° a 75°) e Zoom Contínuo | Antigravity / Codex | concluída | T26, T27 | Controle livre de profundidade da câmera (Pitch de 20° rasante até 75° top-down) via arrasto vertical do botão do meio do mouse; Zoom in / out contínuo (68% a 230%) na roda do mouse; inversão matemática analítica preservando 100% da acurácia de cliques e anéis de alcance em qualquer inclinação. |
 
 ### Notas da T15 (Antigravity)
 
@@ -116,6 +117,22 @@
   - Interpolação suave e cinematográfica (lerp a 60 FPS) transladando a câmera com enquadramento perfeito mantendo a perspectiva superior isométrica.
   - Suporte a pan por arrasto com botão direito do mouse (`button === 2`) e teclas de atalho `WASD` / `Setas` / `J, K, L`.
   - Paridade implementada no Godot 4.3 em `scenes/map/map.gd` (`focar_setor` e arrasto com botão direito).
+
+### Notas da T28 (Antigravity & Codex)
+
+- **Inclinação Vertical de Profundidade (Pitch Dinâmico de 20° a 75°):**
+  - O movimento vertical do mouse ao arrastar com o botão do meio agora ajusta a inclinação de profundidade:
+    - *Visão Rasante (20° a 30° / pitch 0.40 a 0.60):* O terreno achata dramaticamente, o horizonte e as serras descem para a visão panorâmica, proporcionando uma perspectiva imersiva e cinematográfica da batalha.
+    - *Visão de Topo Tática (70° a 75° / pitch 1.20 a 1.40):* O terreno se abre em planta ortogonal/zênite para planejamento de defesa.
+    - *Visão Padrão (45° / pitch 1.00):* A isométrica equilibrada tradicional.
+  - Matriz inversa atualizada em `pontoNaTela`: `dy = (sy - (cy + panY)) / (zoom * pitch)`, garantindo que mira, detecção de hover e posicionamento funcionem com exatidão matemática em qualquer inclinação.
+- **Zoom Contínuo (68% a 230%):**
+  - Controlado fluidamente pela roda do mouse (`wheel`) ou atalhos de teclado `+` / `-`, `PageUp` / `PageDown`.
+  - Teclas `T` (modo Top-Down) e `Y` (modo Rasante) adicionadas.
+- **Paridade no Godot 4.3:**
+  - `scenes/map/map.gd` atualizado para ajustar `camera_pivot.scale.y` e `camera.zoom` suavemente via arrasto do botão do meio e roda do mouse.
+  - Validado via testes automatizados e screenshots do Playwright.
+
 
 
 

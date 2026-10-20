@@ -170,6 +170,20 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - Pan livre por arrasto com o botão direito do mouse (`button === 2`) ou teclas `WASD` / `Setas` do teclado.
   - Sincronização em `Miguel/Canudos/`, `Miguel/Canudos_PC/jogo/`, Godot 4.3 (`scenes/map/map.gd`) e compilação do executável `Canudos.exe`.
 
+### 1.17 Inclinação de Profundidade (Pitch 20° a 75°) e Zoom Contínuo (T28 — Resolvido)
+* **Objetivo:** Permitir ao jogador inclinar a visão em profundidade (Pitch) para mergulhar da visão de topo à visão rasante dramática de trincheira, além de zoom in/out contínuo no scroll do mouse.
+* **Implementação Matemática:**
+  - Aplicação de fator de escala de profundidade no canvas: `g.scale(zoom, zoom * pitch)`.
+  - Arco contínuo de `pitch`: de `0.40` (equivalente a $20^\circ$ rasante) até `1.40` ($75^\circ$ quase zênite).
+  - Inversão da matriz em `pontoNaTela`:
+    $$dy = \frac{sy - (cy + panY)}{zoom \cdot pitch}$$
+    garantindo que qualquer clique do mouse ou anel de alcance tático de 220px permaneça perfeitamente alinhado na tela.
+  - Controle unificado no mouse:
+    - *Roda do mouse (Scroll):* Zoom contínuo de 68% a 230%.
+    - *Arrasto do botão do meio (Scroll Drag):* Eixo X controla o Giro Orbital (Yaw $\pm 36^\circ$); Eixo Y controla a Inclinação de Profundidade (Pitch $20^\circ$ a $75^\circ$).
+  - Teclas rápidas de teclado: `T` (Top-Down 75°), `Y` (Rasante 25°), `+` / `-` (Zoom).
+  - Paridade no Godot 4.3 (`scenes/map/map.gd`) ajustando `camera_pivot.scale.y` e `camera.zoom`.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
@@ -198,5 +212,5 @@ node Miguel/Canudos/testes/campanha.js
 ## 3. Estado Atual das Tarefas (Marcos 0 e 1 Concluídos)
 
 * **T01 a T06 (Marco 0 — Fundação):** Todas 100% concluídas.
-* **T10 a T27 (Marco 1 — Ciclo Jogável, Polish & Áudio/Visual, Câmera Orbital, Sprites Direcionais e Pan Tático):** Todas 100% concluídas e testadas.
+* **T10 a T28 (Marco 1 — Ciclo Jogável, Polish, Câmera Orbital, Sprites Direcionais, Pan Tático, Profundidade Pitch e Zoom):** Todas 100% concluídas e testadas.
 * **Próximo Marco:** Marco 2 — Progressão, Fases da Campanha (1ª a 4ª Expedição) e Artilharia/Morteros históricos.

@@ -199,11 +199,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	elif event is InputEventMouseMotion and _middle_dragging:
 		var delta_x: float = event.position.x - _last_drag_pos.x
+		var delta_y: float = event.position.y - _last_drag_pos.y
 		if camera_pivot != null:
 			# Rotação orbital cônica/funil: amplitude limitada (-36° a +36°) para que o mundo NUNCA fique de cabeça para baixo
 			camera_pivot.rotation = clampf(camera_pivot.rotation + delta_x * 0.0035, -0.628, 0.628)
+			# Inclinação vertical de profundidade (pitch): 20° a 75°
+			camera_pivot.scale.y = clampf(camera_pivot.scale.y - delta_y * 0.0035, 0.45, 1.35)
 			if btn_camera:
-				btn_camera.text = " 📷 Câmera (%.0f°) " % rad_to_deg(camera_pivot.rotation)
+				var pitch_deg := roundf(20.0 + ((camera_pivot.scale.y - 0.45) / (1.35 - 0.45)) * 55.0)
+				btn_camera.text = " 📷 Giro %.0f° · Prof %.0f° " % [rad_to_deg(camera_pivot.rotation), pitch_deg]
 		_last_drag_pos = event.position
 		queue_redraw()
 
@@ -666,6 +670,7 @@ func _reset_camera() -> void:
 	is_camera_aligned = false
 	if camera_pivot != null:
 		camera_pivot.rotation = 0.0
+		camera_pivot.scale = Vector2(1.0, 1.0)
 	if camera != null:
 		camera.zoom = Vector2(1.0, 1.0)
 	if btn_camera != null:
@@ -676,7 +681,7 @@ func _reset_camera() -> void:
 
 func _zoom_camera(factor: float) -> void:
 	if camera != null:
-		var new_z := clampf(camera.zoom.x * factor, 0.75, 1.8)
+		var new_z := clampf(camera.zoom.x * factor, 0.68, 2.30)
 		camera.zoom = Vector2(new_z, new_z)
 		queue_redraw()
 

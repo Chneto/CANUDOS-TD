@@ -49,6 +49,7 @@ flowchart LR
 - [x] **T25 (Antigravity):** Arte de capa canônica de Belo Monte (`capa.jpg`) e compilação do executável Windows nativo `Canudos.exe`.
 - [x] **T26 (Antigravity & Codex):** Câmera orbital cônica em funil (amplitude [-36°, +36°] sem inversão do mapa) e pré-visualização tática contínua com elipse de alcance de 220px e sprite fantasma translúcido sob o mouse.
 - [x] **T27 (Antigravity & Codex):** Overscan com buffer expandido (eliminação de cantos cortados no giro), sprites direcionais em 4 ângulos cardeais (Frente, Perfil, Costas, Diagonal) e sistema de pan suave com botões de enquadramento rápido nas retas estratégicas ([Geral], [1. Entrada], [2. Reta Central], [3. Igreja]).
+- [x] **T28 (Antigravity & Codex):** Inclinação vertical de profundidade livre (Pitch de 20° a 75°) e Zoom In/Out contínuo (68% a 230%) com inversão analítica precisa.
 
 ---
 
