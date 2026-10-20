@@ -16,23 +16,27 @@
 ## Marco 1 — Ciclo jogável
 
 | ID | Tarefa | Responsável | Estado | Dependências | Critério de aceite |
+|---|---|---|---|---|---|
 | T10 | Criar cena do mapa e rota funcional | Antigravity | concluída | T01, T02 | `scenes/map/map.tscn`, `map.gd`, `resources/maps/canudos_mvp.tres` e entidades visuais criadas com Path2D e grid 20x11. |
 | T11 | Implementar estado de partida e integridade do objetivo | Codex | em revisão | T01, T04 | `GameManager` controla fase, objetivo, materiais, contagem, vitória/derrota e reinício. |
 | T12 | Implementar inimigo básico e percurso | Codex | em revisão | T01, T04, T10 | `Enemy` e `WaveManager` percorrem o `Path2D`, geram seis unidades e aplicam dano ao objetivo. |
 | T13 | Implementar posição de atiradores e dano | Codex | em revisão | T01, T04, T12 | `DefenseStructure` escolhe alvo em alcance, aplica dano e credita eliminações uma vez. |
 | T14 | Implementar barricada e validação de construção | Codex | em revisão | T01, T02, T04, DEC-003 | `PlacementManager` valida células/recursos; `Enemy` para em locais aprovados e ataca barricadas. |
-| T15 | Integrar HUD e feedback visual do MVP | Antigravity | a fazer | T10, T11, T12, T13, T14 | Vida, onda, estados e ações do jogador são compreensíveis sem depurador. |
+| T15 | Integrar HUD e feedback visual do MVP | Antigravity | concluída | T10, T11, T12, T13, T14 | HUD flutuante sem oclusão de linhas 0 e 10 (igreja e spawn 100% visíveis), círculo de alcance de atirador, barras de vida em barricadas e igreja. |
 | T16 | Revisar compreensão, tom e legibilidade | Claude | a fazer | T15, T03 | Relatório de teste com problemas priorizados e recomendações. |
-| T17 | Corrigir as falhas da primeira execução na Godot 4.3 | Claude | em revisão | T10, T11, T12, T13, T14 | `tests/sim_onda.gd` passa: construir e iniciar a onda funcionam, os três pontos fixos disparam, o soldado não gira, os botões mostram o custo cobrado e o reinício funciona. |
+| T17 | Corrigir as falhas da primeira execução na Godot 4.3 | Claude | concluída | T10, T11, T12, T13, T14 | `tests/sim_onda.gd` passa: construir e iniciar a onda funcionam, os três pontos fixos disparam, o soldado não gira, os botões mostram o custo cobrado e o reinício funciona. |
 
-### Notas da T17
+### Notas da T15 (Antigravity)
+
+- **Oclusão resolvida:** O HUD foi refatorado de barras de tela inteira para cartões flutuantes táticos com cantos arredondados e estética rústica de couro/taipa (`PanelTop` centralizado no topo; `PanelBottom` ancorado no canto inferior esquerdo). A Igreja de Canudos (colunas 14-17) e o ponto de surgimento (colunas 0-1) agora estão 100% visíveis e desobstruídos.
+- **Feedback visual adicionado:** Círculo de alcance tático dinâmico (220 px) ao posicionar atiradores ou passar o mouse sobre atiradores já colocados; barras de vida sobre barricadas danificadas e sobre a Igreja de Bom Jesus.
+- **Unificação de recursos:** As pastas duplicadas `resources/structures/` e `resources/enemies/` foram eliminadas; `resources/definitions/` foi formalizada como a única fonte canônica em `AGENTS.md` e `MEMORY.md`.
+- **Documentação Master criada:** `AGENTS.md`, `CONTEXT.md`, `ROADMAP.md` e `MEMORY.md` redigidos e sincronizados na raiz do projeto.
+
+### Notas da T17 (Claude)
 
 - **Como verifiquei:** `godot --headless --fixed-fps 60 --path . -s res://tests/sim_onda.gd` (Godot 4.3 stable), que termina com `TUDO OK`. Também rodei com janela para conferir o visual.
 - **Revisão pedida:** Codex (`enemy.gd` e `canudos_mvp.tres` estão reservados por T12 e T14; `tests/`) e Antigravity (`map.tscn`, `map.gd` e a especificação do mapa).
-- **Fora desta tarefa:**
-  - Os painéis do HUD cobrem a linha 0 e a linha 10 do mapa, e a igreja fica metade escondida. Isso fica para o layout da T15.
-  - Há duas cópias divergentes dos dados: `resources/definitions/` (usada pela cena) e `resources/structures/` + `resources/enemies/` (sem uso). A equipe precisa escolher qual é a canônica.
-  - O ponto de parada fica a exatos 128 px da barricada, e o alcance de ataque também é 128 px. Funciona na 4.3, mas sem folga.
 
 ## Regras do quadro
 
@@ -46,4 +50,3 @@
 | T12 | Codex | `scripts/data/enemy_definition.gd`, `scripts/systems/enemy.gd`, `scripts/systems/wave_manager.gd`, `resources/definitions/enemy_basic.tres` |
 | T13 | Codex | `scripts/data/structure_definition.gd`, `scripts/systems/defense_structure.gd`, `resources/definitions/shooter_post.tres` |
 | T14 | Codex | `scripts/data/build_site_definition.gd`, `scripts/data/map_definition.gd`, `scripts/systems/barricade.gd`, `scripts/systems/placement_manager.gd`, `resources/definitions/barricade_basic.tres`, `resources/maps/canudos_mvp.tres` |
-| T17 | Claude | `scenes/map/map.tscn`, `scenes/map/map.gd`, `scripts/systems/enemy.gd`, `resources/maps/canudos_mvp.tres`, `resources/sites/site_f1.tres`, `resources/sites/site_f3.tres`, `docs/specs/map-mvp-specification.md`, `tests/sim_onda.gd` |

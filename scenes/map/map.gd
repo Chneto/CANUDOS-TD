@@ -67,6 +67,12 @@ func _ready() -> void:
 	queue_redraw()
 
 
+func _process(_delta: float) -> void:
+	# Atualiza a prévia de alcance e barras de vida durante a onda
+	if game_manager.phase == GameManager.Phase.WAVE_ACTIVE:
+		queue_redraw()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var cell := _screen_to_cell(event.position)
@@ -144,7 +150,37 @@ func _draw() -> void:
 	var church_size := Vector2(cell_size * 4.5, cell_size * 3.5)
 	draw_texture_rect(TEX_CHURCH, Rect2(church_pos, church_size), false)
 
-	# 4. Desenhar prévia de posicionamento do mouse
+	# Barra de vida estilizada flutuando sobre a Igreja
+	var ch_bar_pos := Vector2(15.75 * cell_size, 7.8 * cell_size)
+	var ch_bar_w := 120.0
+	var ch_bar_h := 6.0
+	var ch_rect := Rect2(ch_bar_pos.x - ch_bar_w * 0.5, ch_bar_pos.y, ch_bar_w, ch_bar_h)
+	var ch_ratio := clampf(float(game_manager.objective_health) / float(game_manager.objective_max_health), 0.0, 1.0)
+	var ch_color := Color(0.2, 0.85, 0.3) if ch_ratio > 0.5 else Color(0.9, 0.7, 0.1) if ch_ratio > 0.25 else Color(0.9, 0.2, 0.2)
+	draw_rect(ch_rect, Color(0.1, 0.08, 0.06, 0.85), true)
+	draw_rect(Rect2(ch_rect.position, Vector2(ch_bar_w * ch_ratio, ch_bar_h)), ch_color, true)
+	draw_rect(ch_rect, Color(0.6, 0.45, 0.25, 0.8), false, 1.0)
+
+	# 4. Indicador de alcance das torres posicionadas (ao passar o mouse por perto)
+	var mouse_pos := get_local_mouse_position()
+	for child in placement_manager.get_children():
+		if child is DefenseStructure and is_instance_valid(child):
+			if mouse_pos.distance_to(child.position) < cell_size * 2.0:
+				draw_circle(child.position, child.definition.attack_range_px, Color(0.2, 0.7, 1.0, 0.06))
+				draw_arc(child.position, child.definition.attack_range_px, 0.0, TAU, 48, Color(0.3, 0.8, 1.0, 0.4), 1.5)
+
+		# Barra de vida das barricadas danificadas
+		elif child is Barricade and is_instance_valid(child) and not child.is_destroyed():
+			if child.health < child.definition.max_health:
+				var bar_w := 48.0
+				var bar_h := 4.0
+				var b_rect := Rect2(child.position.x - bar_w * 0.5, child.position.y - 32.0, bar_w, bar_h)
+				var b_ratio := clampf(child.health / child.definition.max_health, 0.0, 1.0)
+				draw_rect(b_rect, Color(0.1, 0.08, 0.06, 0.8), true)
+				draw_rect(Rect2(b_rect.position, Vector2(bar_w * b_ratio, bar_h)), Color(0.2, 0.85, 0.3), true)
+				draw_rect(b_rect, Color(0.5, 0.35, 0.2), false, 1.0)
+
+	# 5. Desenhar prévia de posicionamento do mouse e círculo de alcance
 	if active_build_definition != null and map_definition.is_in_bounds(current_hover_cell):
 		var site := placement_manager._find_matching_site(active_build_definition, current_hover_cell)
 		var cells := placement_manager._cells_for_placement(active_build_definition, current_hover_cell, site)
@@ -156,6 +192,14 @@ func _draw() -> void:
 				var p := Vector2(c.x * cell_size, c.y * cell_size)
 				draw_rect(Rect2(p, sz), preview_color, true)
 				draw_rect(Rect2(p, sz), border_color, false, 2.0)
+
+		# Círculo de alcance do atirador durante a prévia de construção
+		if active_build_definition.kind == StructureDefinition.Kind.SHOOTER:
+			var center_preview := (Vector2(current_hover_cell) + Vector2(1.0, 0.5)) * cell_size
+			var range_color := Color(0.2, 0.8, 1.0, 0.45) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.35)
+			var fill_color := Color(0.2, 0.8, 1.0, 0.08) if hover_is_valid else Color(1.0, 0.3, 0.3, 0.05)
+			draw_circle(center_preview, active_build_definition.attack_range_px, fill_color)
+			draw_arc(center_preview, active_build_definition.attack_range_px, 0.0, TAU, 64, range_color, 2.0)
 
 
 func _screen_to_cell(pos: Vector2) -> Vector2i:

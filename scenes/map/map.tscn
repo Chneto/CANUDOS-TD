@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scenes/map/map.gd" id="1_map_script"]
 [ext_resource type="Resource" path="res://resources/maps/canudos_mvp.tres" id="2_map_def"]
@@ -17,6 +17,38 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 64, 96, 0, 0, 0, 0, 192, 96, 0, 0, 0, 0, 192, 288, 0, 0, 0, 0, 448, 288, 0, 0, 0, 0, 448, 416, 0, 0, 0, 0, 960, 416, 0, 0, 0, 0, 960, 608)
 }
 point_count = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_top"]
+bg_color = Color(0.1, 0.08, 0.06, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.45, 0.25, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_bottom"]
+bg_color = Color(0.1, 0.08, 0.06, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.45, 0.25, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_map_script")
@@ -50,10 +82,15 @@ barricade_scene = ExtResource("11_barricade_scene")
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="PanelTop" type="PanelContainer" parent="UI"]
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 45.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -360.0
+offset_top = 8.0
+offset_right = 360.0
+offset_bottom = 48.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_top")
 
 [node name="HBox" type="HBoxContainer" parent="UI/PanelTop"]
 layout_mode = 2
@@ -85,13 +122,15 @@ layout_mode = 2
 text = " Reiniciar "
 
 [node name="PanelBottom" type="PanelContainer" parent="UI"]
-anchors_preset = 12
+anchors_preset = 2
 anchor_top = 1.0
-anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -45.0
-grow_horizontal = 2
+offset_left = 16.0
+offset_top = -54.0
+offset_right = 740.0
+offset_bottom = -12.0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_bottom")
 
 [node name="HBox" type="HBoxContainer" parent="UI/PanelBottom"]
 layout_mode = 2
