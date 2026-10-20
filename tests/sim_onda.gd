@@ -33,6 +33,7 @@ func _run() -> void:
 	await _teste_barricadas()
 	await _teste_validacao_e_rotulos()
 	await _teste_clique()
+	await _teste_campeao_conselheiro()
 
 	print("\n%s" % ("TUDO OK" if _falhas == 0 else "%d VERIFICAÇÃO(ÕES) FALHARAM" % _falhas))
 	quit(1 if _falhas > 0 else 0)
@@ -201,3 +202,27 @@ func _capturas(pasta: String) -> void:
 		await process_frame
 	root.get_texture().get_image().save_png(pasta.path_join("canudos_3_fim.png"))
 	print("capturas salvas em ", pasta)
+
+
+func _teste_campeao_conselheiro() -> void:
+	print("\n=== Campeão Antônio Conselheiro e Habilidades")
+	var map := await _novo_mapa()
+	_check(map.champion != null, "nó do Campeão instanciado")
+	_check(map.champion.can_use_mutirao(), "Mutirão disponível no início")
+	_check(not map.champion.can_use_predica(), "Prédica bloqueada fora do combate")
+
+	var ok_move := map.champion.move_to_cell(Vector2i(10, 5))
+	_check(ok_move, "Conselheiro aceita mover para célula fora da estrada")
+	_check(not map.champion.move_to_cell(Vector2i(4, 1)), "Conselheiro recusa mover para a estrada")
+
+	var st := map.placement_manager.place_structure(map.barricade_definition, Vector2i(4, 2))
+	if st is Barricade:
+		st.take_damage(100.0)
+		_check(st.health < st.definition.max_health, "Barricada sofreu dano inicial")
+		map.champion.global_position = st.global_position
+		map.champion.is_moving = false
+		var res := map.champion.use_mutirao()
+		_check(res["ok"] and res["repaired"] >= 1, "Mutirão reparou a barricada próxima")
+		_check(st.health == st.definition.max_health, "Barricada totalmente recuperada pelo Mutirão")
+
+	await _fechar(map)

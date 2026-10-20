@@ -81,6 +81,29 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
   - VFX da Caatinga: partículas de poeira e cinzas avermelhadas/douradas flutuando suavemente com a brisa quente da Caatinga sobre o terreno.
   - Efeitos Sonoros Táteis (Web Audio API): disparos nítidos de fuzil jagunço, impactos sólidos em barricadas, duplo acorde ao concluir construções e aviso de berrante sertanejo ao iniciar cada onda.
 
+### 1.10 Campeão Antônio Conselheiro no Godot 4.3 (T22 — Resolvido por Codex e Antigravity)
+* **Objetivo:** Estabelecer a paridade técnica do campeão Antônio Conselheiro entre a versão protótipo e a arquitetura oficial Godot 4.3 (GDScript 2.0).
+* **Estrutura Implementada:**
+  - Cena dedicada [scenes/champion/champion_conselheiro.tscn](scenes/champion/champion_conselheiro.tscn) com script tipado [scripts/systems/champion_conselheiro.gd](scripts/systems/champion_conselheiro.gd).
+  - Nó `Sprite2D` com textura canônica de pixel art `assets/sprites/champion_conselheiro.png` (camisolão azul-índigo, crucifixo peitoral de madeira, bordão de peregrino e aura circular pulsante).
+  - **Aura de Presença (`AURA_RADIUS_PX = 192.0`):** estruturas defensivas (`DefenseStructure`) dentro do raio têm o cooldown de disparo reduzido (`shoot_interval * 0.8`), acelerando a cadência de tiro dos jagunços.
+  - **Habilidade Ativa Mutirão (`[Q]`):** cura instantaneamente +150 HP em todas as barricadas dentro do raio da aura (cooldown de 18s).
+  - **Habilidade Ativa Prédica (`[W]`):** ativação de fé coletiva que reduz o dano sofrido por barricadas em 50% por 8s (cooldown de 25s).
+  - **Movimentação Tática Diferenciada:** velocidade de 140 px/s na fase de preparação (reposicionamento ágil) e 60 px/s em combate (passo firme de procissão).
+  - **Integração no HUD do Godot:** botões dedicados `[3] Conselheiro`, `[Q] Mutirão` e `[W] Prédica` adicionados ao painel inferior de [scenes/map/map.tscn](scenes/map/map.tscn) e gerenciados em [scenes/map/map.gd](scenes/map/map.gd), incluindo suporte a atalhos de teclado (1, 2, 3, Q, W, Esc).
+
+### 1.11 Pesquisa Histórica e Auditoria de Tom (T03 e T16 — Resolvido por Claude)
+* **Guia Histórico Mínimo Canônico:** Criado em [docs/research/mvp-historical-guide.md](docs/research/mvp-historical-guide.md). Documenta as quatro expedições com armamento verídico de época, geografia da bacia do Vaza-Barris e matriz pedagógica de game design (evitando anacronismos, maniqueísmo barato ou caricaturas).
+* **Auditoria de Compreensão e Tom:** Criada em [docs/research/audit-compreensao-tom.md](docs/research/audit-compreensao-tom.md) avaliando História, Acessibilidade, Loop e Tom (pontuação global 9.4/10).
+
+### 1.12 Áudio Tátil Avançado e Sombras de Projeção (T23 — Resolvido por Antigravity)
+* **Áudio Tátil:** Implementação de 4 novas assinaturas de síntese Web Audio API:
+  - `mutirao`: sino de capela com ataque metálico puro (660Hz) e decaimento exponencial harmônico de 3 segundos.
+  - `predica`: ressonância etérea de coro e harmônicos místicos.
+  - `vitoria`: acorde triunfante maior (C-E-G-C) executado no timbre de pífano e viola sertaneja.
+  - `derrota`: cadência menor melancólica sertaneja.
+* **Profundidade Visual:** Projeção procedural de sombras elípticas de base suave (`rgba(0,0,0,0.28)`) sob todas as estruturas e barricadas na renderização isométrica, eliminando o efeito de sprite "flutuante" sobre o terreno.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
@@ -96,14 +119,18 @@ Este script testa:
 4. Geração e avanço da onda com 6 inimigos.
 5. Disparos e eliminação de inimigos com atribuição de recompensa.
 6. Retenção em barricada e dano.
-7. Condição de vitória e reinício limpo de partida (`reset_run()`).
+7. Funcionamento do Campeão Antônio Conselheiro (aura de 192px, Mutirão curando +150 HP, Prédica reduzindo 50% de dano e velocidade de marcha).
+8. Condição de vitória e reinício limpo de partida (`reset_run()`).
+
+Para verificar a simulação matemática das 4 expedições (campanha completa):
+```bash
+node Miguel/Canudos/testes/campanha.js
+```
 
 ---
 
-## 3. Estado Atual das Tarefas (Marco 1)
+## 3. Estado Atual das Tarefas (Marcos 0 e 1 Concluídos)
 
-* **T10 (Cena do Mapa e Rota):** Concluída.
-* **T11 a T14 (Sistemas de Combate e Estado):** Concluídas e validadas pela T17.
-* **T17 (Correções de 1ª Execução Godot 4.3):** Concluída por Claude.
-* **T15 (Layout do HUD e Feedback Visual de Combate):** **Concluída por Antigravity** (HUD flutuante sem oclusão, alcance tático dinâmico, barras de HP flutuantes, traçadores de pólvora, fumaça balística, hit-flash, bobbing de marcha e tremor de barricada).
-* **T16 (Revisão Histórica e Balanceamento):** Próxima etapa (Claude).
+* **T01 a T06 (Marco 0 — Fundação):** Todas 100% concluídas.
+* **T10 a T23 (Marco 1 — Ciclo Jogável & Polish):** Todas 100% concluídas e testadas.
+* **Próximo Marco:** Marco 2 — Progressão, Fases da Campanha (1ª a 4ª Expedição) e Artilharia/Morteros históricos.

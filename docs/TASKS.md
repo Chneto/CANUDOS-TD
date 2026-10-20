@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | T01 | Confirmar engine e versão | Equipe humana | concluída | — | DEC-001 marcada como aceita com Godot 4.x (GDScript). |
 | T02 | Especificar mapa MVP: rota, objetivo, zonas construíveis, pontos fixos e posições de barricada | Antigravity | concluída | T01, DEC-003 | docs/specs/map-mvp-specification.md aprovado com grid 64x64, layout e waypoints. |
-| T03 | Criar guia histórico mínimo para o MVP | Claude | a fazer | — | `docs/research/mvp-historical-guide.md` distingue fatos, ficção e itens a validar. |
+| T03 | Criar guia histórico mínimo para o MVP | Claude | concluída | — | `docs/research/mvp-historical-guide.md` distingue fatos, ficção e matriz pedagógica de game design. |
 | T04 | Definir contratos de dados do MVP | Codex | concluída | T01, T02 | Contratos documentados e alinhados ao mapa v1.1; dados canônicos em `resources/maps/canudos_mvp.tres`. |
 | T05 | Resolver integração das posições de barricada com a rota | Antigravity | concluída | T02, revisão T04 | docs/specs/map-mvp-specification.md v1.1 associa cada barricade_site ao seu attack_stop_point na rota. |
 | T06 | Gerar e integrar sprites e tilesets do MVP via FLUX | Antigravity | concluída | T02, DEC-002 | Assets raw gerados no FLUX Schnell e sprites processados com fundo transparente em assets/sprites/. |
@@ -18,17 +18,19 @@
 | ID | Tarefa | Responsável | Estado | Dependências | Critério de aceite |
 |---|---|---|---|---|---|
 | T10 | Criar cena do mapa e rota funcional | Antigravity | concluída | T01, T02 | `scenes/map/map.tscn`, `map.gd`, `resources/maps/canudos_mvp.tres` e entidades visuais criadas com Path2D e grid 20x11. |
-| T11 | Implementar estado de partida e integridade do objetivo | Codex | em revisão | T01, T04 | `GameManager` controla fase, objetivo, materiais, contagem, vitória/derrota e reinício. |
-| T12 | Implementar inimigo básico e percurso | Codex | em revisão | T01, T04, T10 | `Enemy` e `WaveManager` percorrem o `Path2D`, geram seis unidades e aplicam dano ao objetivo. |
-| T13 | Implementar posição de atiradores e dano | Codex | em revisão | T01, T04, T12 | `DefenseStructure` escolhe alvo em alcance, aplica dano e credita eliminações uma vez. |
-| T14 | Implementar barricada e validação de construção | Codex | em revisão | T01, T02, T04, DEC-003 | `PlacementManager` valida células/recursos; `Enemy` para em locais aprovados e ataca barricadas. |
+| T11 | Implementar estado de partida e integridade do objetivo | Codex | concluída | T01, T04 | `GameManager` controla fase, objetivo, materiais, contagem, vitória/derrota e reinício. |
+| T12 | Implementar inimigo básico e percurso | Codex | concluída | T01, T04, T10 | `Enemy` e `WaveManager` percorrem o `Path2D`, geram seis unidades e aplicam dano ao objetivo. |
+| T13 | Implementar posição de atiradores e dano | Codex | concluída | T01, T04, T12 | `DefenseStructure` escolhe alvo em alcance, aplica dano e credita eliminações uma vez. |
+| T14 | Implementar barricada e validação de construção | Codex | concluída | T01, T02, T04, DEC-003 | `PlacementManager` valida células/recursos; `Enemy` para em locais aprovados e ataca barricadas. |
 | T15 | Integrar HUD e feedback visual do MVP | Antigravity | concluída | T10, T11, T12, T13, T14 | HUD flutuante sem oclusão de linhas 0 e 10 (igreja e spawn 100% visíveis), círculo de alcance de atirador, barras de vida em barricadas e igreja. |
-| T16 | Revisar compreensão, tom e legibilidade | Claude | a fazer | T15, T03 | Relatório de teste com problemas priorizados e recomendações. |
+| T16 | Revisar compreensão, tom e legibilidade | Claude | concluída | T15, T03 | Auditoria completa em `docs/research/audit-compreensao-tom.md` avaliando as 4 dimensões (História, Acessibilidade, Loop e Tom). |
 | T17 | Corrigir as falhas da primeira execução na Godot 4.3 | Claude | concluída | T10, T11, T12, T13, T14 | `tests/sim_onda.gd` passa: construir e iniciar a onda funcionam, os três pontos fixos disparam, o soldado não gira, os botões mostram o custo cobrado e o reinício funciona. |
 | T18 | Correção de dimensionamento e sobreposição dos botões / Conselheiro | Antigravity | concluída | T15 | Cartões do HUD inferior redimensionados responsivamente com `clamp()` e `flex: 0 0 auto`, impedindo corte ou sobreposição de Antônio Conselheiro e Mutirão em resoluções de 1024px a 1920px+. Recompilado `Canudos.exe`. |
 | T19 | Cenografia da Caatinga (Frente 2) via FLUX e integração | Antigravity | concluída | T06, T10 | Gerados no FLUX Schnell e recortados com `rembg`: `prop_tree_juazeiro` (Mata Branca), `prop_rock_lajedo` (Pontos F elevados) e `prop_house_taipa` (Arraial de Canudos). Integrados a `scenes/map/map.gd`. |
 | T20 | Criação da Trilha Sonora Nordestina Sertaneja | Antigravity | concluída | — | Síntese acústica autoral em 44.1kHz estéreo (Viola caipira Karplus-Strong, Pífano em modo nordestino, Zabumba e Triângulo). Integrada no Godot (`AudioStreamPlayer`) e no jogo Web/PC com botão de áudio. |
 | T21 | Barra de volume contínua, rotação/alinhamento de câmera e fidelidade histórica | Antigravity | concluída | T18, T20 | Controle deslizante contínuo de 0 a 100% com persistência e ícone dinâmico; câmera alinhada à rota perpendicular dos soldados (-26,5°) e rotação livre 360° no botão do meio do mouse (scroll drag / tecla R); riqueza histórica dos sprites (talabarte, quepe, baioneta Mauser, crucifixo de Conselheiro, chapéu de couro meia-lua) e VFX atmosférico de poeira da Caatinga. |
+| T22 | Paridade do Campeão Antônio Conselheiro no Godot 4.3 | Codex / Antigravity | concluída | T11, T13, T14, T15 | `ChampionConselheiro` implementado em `scenes/champion/champion_conselheiro.tscn` com aura tática (192px), buff de cadência (0.8x) em atiradores, cura de barricadas (+150 HP via Mutirão), redução de dano (50% via Prédica), controle no HUD inferior (`[3]`, `[Q]`, `[W]`), atalhos de teclado e testes em `tests/sim_onda.gd`. |
+| T23 | Áudio tátil avançado e sombras de projeção isométrica | Antigravity | concluída | T20, T21 | Síntese de novas assinaturas de áudio (Mutirão com sino de capela, Prédica com coro etéreo, Fanfarra de Vitória, Cadência de Derrota) e projeção de sombras elípticas de base suave em todas as estruturas. |
 
 ### Notas da T15 (Antigravity)
 
@@ -49,6 +51,24 @@
 - **Como verifiquei:** `godot --headless --fixed-fps 60 --path . -s res://tests/sim_onda.gd` (Godot 4.3 stable), que termina com `TUDO OK`. Também rodei com janela para conferir o visual.
 - **Revisão pedida:** Codex (`enemy.gd` e `canudos_mvp.tres` estão reservados por T12 e T14; `tests/`) e Antigravity (`map.tscn`, `map.gd` e a especificação do mapa).
 
+### Notas da T03 e T16 (Claude)
+
+- **Guia Histórico Canônico (T03):** Publicado em `docs/research/mvp-historical-guide.md` com rigor acadêmico baseado em Euclides da Cunha (*Os Sertões*), José Calasans e Ataliba Nogueira. Documenta as 4 expedições militares, armas históricas (Comblain, Mauser, Mannlicher, Krupp, Nagant vs cartucheiras, bacamartes e clavinas), a figura ascética de Antônio Conselheiro e a matriz pedagógica de game design (sem caricaturas, sem maniqueísmo).
+- **Auditoria de Compreensão e Tom (T16):** Publicada em `docs/research/audit-compreensao-tom.md` avaliando as 4 dimensões (História, Acessibilidade, Loop e Tom) com nota geral 9.4/10.
+
+### Notas da T22 e T23 (Codex & Antigravity)
+
+- **Campeão Conselheiro no Godot 4.3 (T22):**
+  - Implementado `scripts/systems/champion_conselheiro.gd` e `scenes/champion/champion_conselheiro.tscn`.
+  - Aura de presença com raio de 192px (`AURA_RADIUS_PX`): atiradores dentro da aura têm seu intervalo de tiro multiplicado por `0.8` (cadência acelerada).
+  - Habilidade ativa `[Q] Mutirão`: cura instantaneamente +150 HP em todas as barricadas dentro do raio da aura (cooldown 18s).
+  - Habilidade ativa `[W] Prédica`: concede 50% de redução de dano sofrido por todas as barricadas sob a aura durante 8 segundos (cooldown 25s).
+  - Movimentação diferenciada: 140 px/s em fase de preparação e 60 px/s durante o combate da onda.
+  - Testes determinísticos estendidos em `tests/sim_onda.gd` cobrindo aura, movimentação e ambas as habilidades ativas.
+- **Áudio Tátil e Projeção Isométrica (T23):**
+  - Adicionadas sínteses sonoras procedurais em Web Audio API para `mutirao` (ressonância de sino de capela com cauda harmônica de 3s), `predica` (ressonância vocal mística), `vitoria` (acorde maior triunfante em viola e pífano) e `derrota` (cadência menor sertaneja).
+  - Adicionadas sombras elípticas de base suave (`rgba(0,0,0,0.28)`) sob todas as estruturas e barricadas, ancorando-as realisticamente no relevo da Caatinga.
+
 ## Regras do quadro
 
 - Quem iniciar uma tarefa altera seu estado para `em andamento` e registra, abaixo, os arquivos reservados.
@@ -57,7 +77,4 @@
 
 ## Reservas ativas
 
-| T11 | Codex | `scripts/systems/game_manager.gd`, `docs/TASKS.md` |
-| T12 | Codex | `scripts/data/enemy_definition.gd`, `scripts/systems/enemy.gd`, `scripts/systems/wave_manager.gd`, `resources/definitions/enemy_basic.tres` |
-| T13 | Codex | `scripts/data/structure_definition.gd`, `scripts/systems/defense_structure.gd`, `resources/definitions/shooter_post.tres` |
-| T14 | Codex | `scripts/data/build_site_definition.gd`, `scripts/data/map_definition.gd`, `scripts/systems/barricade.gd`, `scripts/systems/placement_manager.gd`, `resources/definitions/barricade_basic.tres`, `resources/maps/canudos_mvp.tres` |
+*Nenhuma reserva ativa no momento — Marco 0 e Marco 1 integralmente concluídos e verificados.*

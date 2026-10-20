@@ -37,7 +37,14 @@ func _process(delta: float) -> void:
 	if target == null:
 		return
 
-	_attack_timer = definition.attack_interval_s
+	var interval := definition.attack_interval_s
+	var champions := get_tree().get_nodes_in_group("champions")
+	for node in champions:
+		if node is ChampionConselheiro and node.is_in_aura(global_position):
+			interval *= 0.8 # 25% mais tiros sob a aura do Conselheiro
+			break
+
+	_attack_timer = interval
 	attack_fired.emit(target)
 	_play_fire_recoil()
 	target.take_damage(definition.attack_damage)

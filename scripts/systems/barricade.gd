@@ -33,7 +33,15 @@ func take_damage(amount: float) -> void:
 	if _destroyed or amount <= 0.0:
 		return
 
-	health = maxf(0.0, health - amount)
+	# Redução de 50% de dano se a Prédica do Conselheiro estiver ativa no alcance
+	var final_damage := amount
+	var champions := get_tree().get_nodes_in_group("champions")
+	for node in champions:
+		if node is ChampionConselheiro and node.is_in_predica_buff(global_position):
+			final_damage *= 0.5
+			break
+
+	health = maxf(0.0, health - final_damage)
 	health_changed.emit(health, definition.max_health)
 	_play_hit_shake()
 
@@ -41,6 +49,20 @@ func take_damage(amount: float) -> void:
 		_destroyed = true
 		destroyed.emit(site_id)
 		queue_free()
+
+
+func repair(amount: float) -> void:
+	if _destroyed or amount <= 0.0:
+		return
+
+	health = minf(definition.max_health, health + amount)
+	health_changed.emit(health, definition.max_health)
+
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null and is_instance_valid(sprite):
+		var tw := create_tween()
+		sprite.modulate = Color(1.2, 1.8, 1.2) # flash esverdeado de conserto/mutirão
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.25)
 
 
 func _play_hit_shake() -> void:

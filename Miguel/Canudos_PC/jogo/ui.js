@@ -239,6 +239,48 @@
         g4.gain.exponentialRampToValueAtTime(0.001, agora + 0.55);
         osc3.connect(flt2); flt2.connect(g4); g4.connect(ctx.destination);
         osc3.start(agora); osc3.stop(agora + 0.55);
+      } else if (tipo === 'mutirao') {
+        var oscM = ctx.createOscillator();
+        var gM = ctx.createGain();
+        oscM.type = 'sine';
+        oscM.frequency.setValueAtTime(523.25, agora);
+        oscM.exponentialRampToValueAtTime(1046.5, agora + 0.05);
+        gM.gain.setValueAtTime(vol * 0.5, agora);
+        gM.gain.exponentialRampToValueAtTime(0.001, agora + 0.45);
+        oscM.connect(gM); gM.connect(ctx.destination);
+        oscM.start(agora); oscM.stop(agora + 0.45);
+      } else if (tipo === 'predica') {
+        var oscP = ctx.createOscillator();
+        var gP = ctx.createGain();
+        oscP.type = 'triangle';
+        oscP.frequency.setValueAtTime(220, agora);
+        oscP.linearRampToValueAtTime(277.18, agora + 0.3);
+        gP.gain.setValueAtTime(0.001, agora);
+        gP.gain.linearRampToValueAtTime(vol * 0.45, agora + 0.08);
+        gP.gain.exponentialRampToValueAtTime(0.001, agora + 0.65);
+        oscP.connect(gP); gP.connect(ctx.destination);
+        oscP.start(agora); oscP.stop(agora + 0.65);
+      } else if (tipo === 'vitoria') {
+        [261.63, 329.63, 392.0, 523.25].forEach(function (freq, i) {
+          var o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'triangle'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.001, agora + i * 0.05);
+          g.gain.linearRampToValueAtTime(vol * 0.35, agora + i * 0.05 + 0.04);
+          g.gain.exponentialRampToValueAtTime(0.001, agora + i * 0.05 + 0.8);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(agora + i * 0.05); o.stop(agora + i * 0.05 + 0.8);
+        });
+      } else if (tipo === 'derrota') {
+        [392.0, 311.13, 261.63].forEach(function (freq, i) {
+          var o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sawtooth'; o.frequency.value = freq;
+          var flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 450;
+          g.gain.setValueAtTime(0.001, agora + i * 0.12);
+          g.gain.linearRampToValueAtTime(vol * 0.3, agora + i * 0.12 + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.001, agora + i * 0.12 + 0.9);
+          o.connect(flt); flt.connect(g); g.connect(ctx.destination);
+          o.start(agora + i * 0.12); o.stop(agora + i * 0.12 + 0.9);
+        });
       }
     } catch (e) {}
   }
@@ -476,6 +518,8 @@
   function processarEventos() {
     jogo.eventos.forEach(function (ev) {
       R.efeito(vis, ev, cena.P);
+      if (ev.tipo === 'vitoria') tocarSfx('vitoria');
+      if (ev.tipo === 'derrota') tocarSfx('derrota');
       if (ev.tipo === 'vitoria' || ev.tipo === 'derrota') {
         vis.ferramenta = null;
         pausado = false;
@@ -511,6 +555,7 @@
   function usarHabilidade(nome) {
     var r = N.usarHabilidade(jogo, nome);
     if (!r.ok) avisar(r.motivo);
+    else tocarSfx(nome);
   }
 
   // Esc: primeiro cancela a obra ou a seleção; sem nada para cancelar, abre o menu.

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scenes/map/map.gd" id="1_map_script"]
 [ext_resource type="Resource" path="res://resources/maps/canudos_mvp.tres" id="2_map_def"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_sniper.tscn" id="10_sniper_scene"]
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_barricade.tscn" id="11_barricade_scene"]
 [ext_resource type="AudioStream" path="res://assets/audio/music_caatinga_resistencia.wav" id="12_bgm"]
+[ext_resource type="PackedScene" path="res://scenes/champion/champion_conselheiro.tscn" id="13_champion_scene"]
 
 [sub_resource type="Curve2D" id="Curve2D_path"]
 _data = {
@@ -140,14 +141,14 @@ anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
 offset_top = -54.0
-offset_right = 740.0
+offset_right = 1060.0
 offset_bottom = -12.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_bottom")
 
 [node name="HBox" type="HBoxContainer" parent="UI/PanelBottom"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 12
 
 [node name="BtnBuildSniper" type="Button" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
@@ -157,10 +158,27 @@ text = " Posição de atiradores (60 M) "
 layout_mode = 2
 text = " Barricada (25 M) "
 
+[node name="BtnChampion" type="Button" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = " [3] Conselheiro "
+
+[node name="BtnMutirao" type="Button" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = " [Q] Mutirão "
+
+[node name="BtnPredica" type="Button" parent="UI/PanelBottom/HBox"]
+layout_mode = 2
+text = " [W] Prédica "
+
 [node name="LabelStatus" type="Label" parent="UI/PanelBottom/HBox"]
 layout_mode = 2
 text = "Selecione uma estrutura para construir ou inicie o combate."
 
+
+[node name="ChampionConselheiro" parent="." node_paths=PackedStringArray("map_definition", "game_manager") instance=ExtResource("13_champion_scene")]
+position = Vector2(1088, 416)
+map_definition = ExtResource("2_map_def")
+game_manager = NodePath("../GameManager")
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("12_bgm")

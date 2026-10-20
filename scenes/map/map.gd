@@ -57,7 +57,13 @@ var hover_is_valid: bool = false
 @onready var music_player: AudioStreamPlayer = $MusicPlayer
 @onready var btn_sniper: Button = $UI/PanelBottom/HBox/BtnBuildSniper
 @onready var btn_barricade: Button = $UI/PanelBottom/HBox/BtnBuildBarricade
+@onready var btn_champion: Button = $UI/PanelBottom/HBox/BtnChampion
+@onready var btn_mutirao: Button = $UI/PanelBottom/HBox/BtnMutirao
+@onready var btn_predica: Button = $UI/PanelBottom/HBox/BtnPredica
 @onready var lbl_status: Label = $UI/PanelBottom/HBox/LabelStatus
+@onready var champion: ChampionConselheiro = $ChampionConselheiro
+
+var champion_selected: bool = false
 
 
 func _ready() -> void:
@@ -80,6 +86,12 @@ func _ready() -> void:
 	btn_restart.pressed.connect(_on_restart_pressed)
 	btn_sniper.pressed.connect(_on_select_sniper_pressed)
 	btn_barricade.pressed.connect(_on_select_barricade_pressed)
+	if btn_champion:
+		btn_champion.pressed.connect(_on_select_champion_pressed)
+	if btn_mutirao:
+		btn_mutirao.pressed.connect(_on_use_mutirao_pressed)
+	if btn_predica:
+		btn_predica.pressed.connect(_on_use_predica_pressed)
 	if slider_volume:
 		slider_volume.value_changed.connect(_on_volume_changed)
 
@@ -96,6 +108,27 @@ func _process(_delta: float) -> void:
 	if game_manager.phase == GameManager.Phase.WAVE_ACTIVE:
 		queue_redraw()
 
+	# Atualiza rótulos e estado das habilidades do Conselheiro
+	if champion != null:
+		if btn_mutirao != null:
+			if champion.mutirao_cd_timer > 0.0:
+				btn_mutirao.text = " [Q] Mutirão (%.0fs) " % champion.mutirao_cd_timer
+				btn_mutirao.disabled = true
+			else:
+				btn_mutirao.text = " [Q] Mutirão "
+				btn_mutirao.disabled = false
+
+		if btn_predica != null:
+			if champion.predica_active_timer > 0.0:
+				btn_predica.text = " [W] Prédica (%.0fs) " % champion.predica_active_timer
+				btn_predica.disabled = true
+			elif champion.predica_cd_timer > 0.0:
+				btn_predica.text = " [W] Prédica (%.0fs) " % champion.predica_cd_timer
+				btn_predica.disabled = true
+			else:
+				btn_predica.text = " [W] Prédica "
+				btn_predica.disabled = game_manager.phase != GameManager.Phase.WAVE_ACTIVE
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
@@ -109,14 +142,20 @@ func _unhandled_input(event: InputEvent) -> void:
 					active_build_definition.display_name,
 					"Válido (Clique para posicionar)" if hover_is_valid else status["reason"]
 				]
+			elif champion_selected:
+				hover_is_valid = map_definition.is_inside_grid(current_hover_cell) and not map_definition.is_road(current_hover_cell)
+				lbl_status.text = "Mover Conselheiro para %s: %s" % [
+					current_hover_cell,
+					"Válido" if hover_is_valid else "Não pode andar na estrada"
+				]
 			else:
 				hover_is_valid = false
 			queue_redraw()
 
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			var cell := _screen_to_cell(event.position)
 			if active_build_definition != null:
-				var cell := _screen_to_cell(event.position)
 				var placed := placement_manager.place_structure(active_build_definition, cell)
 				if placed != null:
 					lbl_status.text = "%s posicionado com sucesso!" % active_build_definition.display_name
@@ -125,8 +164,33 @@ func _unhandled_input(event: InputEvent) -> void:
 				else:
 					var status := placement_manager.placement_status(active_build_definition, cell)
 					lbl_status.text = "Não é possível posicionar: %s" % status["reason"]
+			elif champion_selected:
+				if champion != null and champion.move_to_cell(cell):
+					lbl_status.text = "Antônio Conselheiro caminha para a célula %s..." % [cell]
+					champion_selected = false
+					queue_redraw()
+				else:
+					lbl_status.text = "Destino inválido: o Conselheiro só anda fora da estrada e dentro do mapa."
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			active_build_definition = null
+			champion_selected = false
+			lbl_status.text = "Seleção cancelada."
+			queue_redraw()
+
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_1:
+			_on_select_barricade_pressed()
+		elif event.keycode == KEY_2:
+			_on_select_sniper_pressed()
+		elif event.keycode == KEY_3:
+			_on_select_champion_pressed()
+		elif event.keycode == KEY_Q:
+			_on_use_mutirao_pressed()
+		elif event.keycode == KEY_W:
+			_on_use_predica_pressed()
+		elif event.keycode == KEY_ESCAPE:
+			active_build_definition = null
+			champion_selected = false
 			lbl_status.text = "Seleção cancelada."
 			queue_redraw()
 
@@ -378,3 +442,28 @@ func _on_volume_changed(val: float) -> void:
 			music_player.volume_db = -80.0
 		else:
 			music_player.volume_db = linear_to_db(val / 100.0)
+
+
+func _on_select_champion_pressed() -> void:
+	active_build_definition = null
+	champion_selected = true
+	lbl_status.text = "Antônio Conselheiro selecionado. Clique em uma casa livre fora da estrada para que ele caminhe até lá."
+	queue_redraw()
+
+
+func _on_use_mutirao_pressed() -> void:
+	if champion != null:
+		var res := champion.use_mutirao()
+		if res["ok"]:
+			lbl_status.text = "Mutirão concluído! %d barricada(s) reparada(s)." % res["repaired"]
+		else:
+			lbl_status.text = res["reason"]
+
+
+func _on_use_predica_pressed() -> void:
+	if champion != null:
+		var res := champion.use_predica()
+		if res["ok"]:
+			lbl_status.text = "Prédica iniciada! Barricadas próximas sofrem metade do dano por %.0fs." % res["duration"]
+		else:
+			lbl_status.text = res["reason"]
