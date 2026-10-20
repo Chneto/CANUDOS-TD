@@ -275,6 +275,67 @@ kbd {
 .velocidades button[aria-pressed="true"] { background: var(--ouro); color: var(--ouro-tinta); }
 .opcao-vel .velocidades button { font-family: var(--fonte-texto); }
 
+/* ── Controle de Volume e Câmera no HUD ── */
+.controle-volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--placa);
+  border: 2px solid var(--placa-borda);
+  padding: 2px 8px;
+  box-sizing: border-box;
+  color: var(--placa-tinta);
+}
+.controle-volume .bt-icone {
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 2px;
+  color: var(--placa-tinta);
+  display: flex;
+  align-items: center;
+}
+.controle-volume .bt-icone:hover {
+  transform: scale(1.15);
+}
+.controle-volume input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 6px;
+  background: #2A1A10;
+  border: 1px solid var(--placa-borda);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+.controle-volume input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ouro);
+  border: 2px solid var(--ouro-tinta);
+  cursor: pointer;
+}
+.controle-volume input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ouro);
+  border: 2px solid var(--ouro-tinta);
+  cursor: pointer;
+}
+.rotulo-volume {
+  font: 600 13px var(--fonte-pixel);
+  font-variant-numeric: tabular-nums;
+  color: var(--ouro);
+  min-width: 32px;
+  text-align: right;
+}
+
 .aviso {
   position: absolute;
   left: 50%;
@@ -534,6 +595,9 @@ kbd {
   .ferramenta .resumo, .habilidade .resumo { display: none; }
   .selecao { min-width: 6em; max-width: 9em; font-size: 11px; padding: 4px 8px; }
   .iniciar { min-width: 7em; font-size: 15px; padding: 6px 10px; }
+  .controle-volume input[type="range"] { width: 50px; }
+  .rotulo-volume { font-size: 11px; min-width: 25px; }
+  #bt-camera { padding: 5px 8px; font-size: 13px; }
 }
 
 @media (max-width: 760px) {
@@ -549,6 +613,7 @@ kbd {
   .retrato { width: 44px; height: 44px; }
   .selecao { min-width: 12em; }
   .iniciar { min-width: 7em; font-size: 16px; }
+  .controle-volume input[type="range"] { width: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .barra > div { transition: none; }
@@ -652,7 +717,12 @@ kbd {
         <button type="button" data-vel="3" aria-pressed="false">3×</button>
       </div>
       <button type="button" class="botao-placa" id="bt-pausa" disabled>Pausar</button>
-      <button type="button" class="botao-placa" id="bt-musica" title="Música sertaneja">Música: Sim</button>
+      <button type="button" class="botao-placa" id="bt-camera" title="Girar câmera: clique para alternar ou arraste com o botão do meio do mouse (R restaura)">🎥 Alinhada</button>
+      <div class="controle-volume" role="group" aria-label="Ajuste do volume">
+        <button type="button" class="bt-icone" id="bt-mudo" title="Silenciar / Ativar som">🔊</button>
+        <input type="range" id="slider-volume" min="0" max="100" value="70" aria-label="Volume da música">
+        <span class="rotulo-volume" id="rotulo-volume">70%</span>
+      </div>
       <button type="button" class="botao-placa" id="bt-menu">Menu</button>
     </div>
   </header>

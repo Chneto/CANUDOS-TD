@@ -53,6 +53,8 @@ var hover_is_valid: bool = false
 @onready var lbl_enemies: Label = $UI/PanelTop/HBox/LabelEnemies
 @onready var btn_wave: Button = $UI/PanelTop/HBox/BtnStartWave
 @onready var btn_restart: Button = $UI/PanelTop/HBox/BtnRestart
+@onready var slider_volume: HSlider = $UI/PanelTop/HBox/SliderVolume
+@onready var music_player: AudioStreamPlayer = $MusicPlayer
 @onready var btn_sniper: Button = $UI/PanelBottom/HBox/BtnBuildSniper
 @onready var btn_barricade: Button = $UI/PanelBottom/HBox/BtnBuildBarricade
 @onready var lbl_status: Label = $UI/PanelBottom/HBox/LabelStatus
@@ -78,6 +80,8 @@ func _ready() -> void:
 	btn_restart.pressed.connect(_on_restart_pressed)
 	btn_sniper.pressed.connect(_on_select_sniper_pressed)
 	btn_barricade.pressed.connect(_on_select_barricade_pressed)
+	if slider_volume:
+		slider_volume.value_changed.connect(_on_volume_changed)
 
 	# Nome e custo vêm das definições, para o botão nunca divergir do valor cobrado
 	btn_sniper.text = " %s (%d M) " % [shooter_definition.display_name, shooter_definition.cost_materials]
@@ -366,3 +370,11 @@ func _on_run_finished(won: bool) -> void:
 		lbl_status.text = "VITÓRIA! O Arraial de Canudos resistiu à primeira expedição!"
 	else:
 		lbl_status.text = "DERROTA! A Igreja de Bom Jesus foi tomada pelas forças republicanas."
+
+
+func _on_volume_changed(val: float) -> void:
+	if music_player:
+		if val <= 0.0:
+			music_player.volume_db = -80.0
+		else:
+			music_player.volume_db = linear_to_db(val / 100.0)

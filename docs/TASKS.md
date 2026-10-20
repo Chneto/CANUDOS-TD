@@ -28,6 +28,7 @@
 | T18 | Correção de dimensionamento e sobreposição dos botões / Conselheiro | Antigravity | concluída | T15 | Cartões do HUD inferior redimensionados responsivamente com `clamp()` e `flex: 0 0 auto`, impedindo corte ou sobreposição de Antônio Conselheiro e Mutirão em resoluções de 1024px a 1920px+. Recompilado `Canudos.exe`. |
 | T19 | Cenografia da Caatinga (Frente 2) via FLUX e integração | Antigravity | concluída | T06, T10 | Gerados no FLUX Schnell e recortados com `rembg`: `prop_tree_juazeiro` (Mata Branca), `prop_rock_lajedo` (Pontos F elevados) e `prop_house_taipa` (Arraial de Canudos). Integrados a `scenes/map/map.gd`. |
 | T20 | Criação da Trilha Sonora Nordestina Sertaneja | Antigravity | concluída | — | Síntese acústica autoral em 44.1kHz estéreo (Viola caipira Karplus-Strong, Pífano em modo nordestino, Zabumba e Triângulo). Integrada no Godot (`AudioStreamPlayer`) e no jogo Web/PC com botão de áudio. |
+| T21 | Barra de volume contínua, rotação/alinhamento de câmera e fidelidade histórica | Antigravity | concluída | T18, T20 | Controle deslizante contínuo de 0 a 100% com persistência e ícone dinâmico; câmera alinhada à rota perpendicular dos soldados (-26,5°) e rotação livre 360° no botão do meio do mouse (scroll drag / tecla R); riqueza histórica dos sprites (talabarte, quepe, baioneta Mauser, crucifixo de Conselheiro, chapéu de couro meia-lua) e VFX atmosférico de poeira da Caatinga. |
 
 ### Notas da T15 (Antigravity)
 

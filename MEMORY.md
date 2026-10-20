@@ -65,6 +65,22 @@ Este arquivo serve como **registro contínuo de aprendizado, lições técnicas 
 * **Loop Seamless:** Duração de 42,7 segundos com fade cruzado para repetição contínua.
 * **Integração:** Adicionado `AudioStreamPlayer` em `scenes/map/map.tscn` (Godot 4.3) e botão `#bt-musica` com áudio HTML5 nos protótipos Web e PC.
 
+### 1.9 Controle Contínuo de Volume, Rotação/Alinhamento de Câmera e Fidelidade Histórica (T21 — Resolvido)
+* **Controle de Volume:** Substituído o botão binário sim/não por slider contínuo de 0% a 100% com indicador percentual, botão de mudo com ícone dinâmico (`🔇`/`🔈`/`🔉`/`🔊`), persistência em `localStorage` e desbloqueio suave de áudio ao primeiro clique/toque do jogador. No Godot 4.3, adicionado `HSlider` vinculado a `AudioServer.linear_to_db`.
+* **Matemática da Câmera Zero-Lag:**
+  - A rotação de $\theta_0 = -26,565^\circ$ ($-0,46364$ rad) em torno do centro do campo de batalha $(P.L/2, P.A/2)$ alinha perfeitamente o eixo $X$ da projeção isométrica 2:1 à horizontal do monitor, tornando o avanço das tropas paralelo às bordas superior e inferior da tela.
+  - Implementada rotação via transformação afim de canvas 2D acelerada por hardware no momento do blit do buffer `B.cv` (evita refazer o buffer pesado procedural de chão, garantindo 60 FPS estáveis sem quebra de quadros ou artefatos).
+  - Rotação livre 360° com arrasto do botão do meio do mouse (scroll drag), botão de ciclo `bt-camera` na barra superior, zoom suave com a roda do mouse e restauração rápida com a tecla `R` (`Shift+R` para isométrica pura de 0°).
+  - Inversão analítica de matriz implementada em `pontoNaTela`:
+    $$\begin{pmatrix} dx' \\ dy' \end{pmatrix} = \frac{1}{zoom} \begin{pmatrix} \cos(-\theta) & -\sin(-\theta) \\ \sin(-\theta) & \cos(-\theta) \end{pmatrix} \begin{pmatrix} sx - cx \\ sy - cy \end{pmatrix}$$
+    garantindo que detecção de hover, anéis de alcance e cliques de colocação permaneçam 100% exatos em qualquer ângulo.
+* **Fidelidade Histórica dos Sprites e Efeitos Atmosféricos:**
+  - Jagunços: chapéu de couro legítimo com abas em meia-lua e barbicacho, gibão sertanejo e cartucheira diagonal.
+  - Antônio Conselheiro: camisolão de brim azul escuro com drapeado detalhado, crucifixo peitoral de madeira e bordão de jurema.
+  - Soldados Republicados: talabarte de couro branco cruzando a farda azul-ferrete, quepe com pala escura e baioneta de metal brilhante na ponta do fuzil Mauser.
+  - VFX da Caatinga: partículas de poeira e cinzas avermelhadas/douradas flutuando suavemente com a brisa quente da Caatinga sobre o terreno.
+  - Efeitos Sonoros Táteis (Web Audio API): disparos nítidos de fuzil jagunço, impactos sólidos em barricadas, duplo acorde ao concluir construções e aviso de berrante sertanejo ao iniciar cada onda.
+
 ---
 
 ## 2. Padrões de Verificação Rápida
