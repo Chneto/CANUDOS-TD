@@ -544,6 +544,9 @@
     if (fimDeJogo()) return;
     vis.ferramenta = vis.ferramenta === tipo ? null : tipo;
     vis.selecionada = null;
+    if (vis.ferramenta) {
+      avisar('Modo ' + (tipo === 'atiradores' ? 'Atiradores (60M)' : 'Barricada (25M)') + ': mova o mouse para prévia e alcance');
+    }
   }
 
   function selecionarCampeao() {
@@ -587,8 +590,9 @@
     var sx = (ev.clientX - r.left) * cena.P.L / r.width;
     var sy = (ev.clientY - r.top) * cena.P.A / r.height;
 
-    var rot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : -0.4636476;
-    var zoom = (vis && vis.zoomCamera) || 1.15;
+    var rawRot = (vis && vis.rotacaoCamera !== undefined) ? vis.rotacaoCamera : 0;
+    var rot = Math.max(-0.628, Math.min(0.628, rawRot));
+    var zoom = Math.max(0.85, Math.min(1.75, (vis && vis.zoomCamera) || 1.08));
     var cx = cena.P.L / 2;
     var cy = cena.P.A / 2;
 
@@ -660,6 +664,54 @@
       vis.hover = toque ? null : c;
     });
 
+    tela.addEventListener('pointermove', function (ev) {
+      if (arrastandoCamera) {
+        var dx = ev.clientX - camMouseX;
+        var dy = ev.clientY - camMouseY;
+        var rotAtual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : 0;
+        // Rotação orbital cônica/funil: amplitude limitada (-36° a +36°) para que o mundo NUNCA fique de cabeça para baixo
+        var novaRot = Math.max(-0.628, Math.min(0.628, rotAtual + dx * 0.0035));
+        vis.rotacaoCamera = novaRot;
+
+        // Variação suave de elevação/zoom no eixo vertical (funil)
+        var zoomAtual = vis.zoomCamera || 1.15;
+        vis.zoomCamera = Math.max(0.85, Math.min(1.7, zoomAtual - dy * 0.002));
+
+        camMouseX = ev.clientX;
+        camMouseY = ev.clientY;
+
+        var btc = $('bt-camera');
+        if (btc) btc.textContent = '🎥 ' + Math.round(novaRot * 180 / Math.PI) + '°';
+        return;
+      }
+
+      if (ev.pointerType === 'mouse' || ev.pointerType === 'pen') {
+        var p = pontoNaTela(ev);
+        var c = R.celulaNaTela(cena, p.x, p.y);
+        vis.hover = c;
+      }
+    });
+
+    tela.addEventListener('pointerup', function (ev) {
+      if (arrastandoCamera) {
+        arrastandoCamera = false;
+        try { tela.releasePointerCapture(ev.pointerId); } catch (e) {}
+      }
+    });
+
+    tela.addEventListener('pointerleave', function () {
+      if (!arrastandoCamera) {
+        vis.hover = null;
+      }
+    });
+
+    tela.addEventListener('wheel', function (ev) {
+      ev.preventDefault();
+      var fator = ev.deltaY < 0 ? 1.08 : 0.92;
+      var z = (vis.zoomCamera || 1.15) * fator;
+      vis.zoomCamera = Math.max(0.85, Math.min(1.75, z));
+    }, { passive: false });
+
     document.querySelectorAll('.ferramenta').forEach(function (b) {
       b.addEventListener('click', function () { escolherFerramenta(b.dataset.tipo); });
     });
@@ -676,22 +728,22 @@
     var btc = $('bt-camera');
     if (btc) {
       btc.addEventListener('click', function () {
-        var atual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : -0.4636476;
-        if (Math.abs(atual - (-0.4636476)) < 0.05) {
-          vis.rotacaoCamera = 0;
-          vis.zoomCamera = 1.0;
-          btc.textContent = '🎥 0° Padrão';
-          avisar('Câmera: Isométrica clássica (0°)');
-        } else if (Math.abs(atual) < 0.05) {
-          vis.rotacaoCamera = Math.PI - 0.4636476;
-          vis.zoomCamera = 1.15;
-          btc.textContent = '🎥 180° Invertida';
-          avisar('Câmera: Vista do Arraial (180°)');
-        } else {
+        var atual = vis.rotacaoCamera !== undefined ? vis.rotacaoCamera : 0;
+        if (Math.abs(atual) < 0.08) {
           vis.rotacaoCamera = -0.4636476;
           vis.zoomCamera = 1.15;
-          btc.textContent = '🎥 Alinhada';
-          avisar('Câmera: Alinhada perpendicular à marcha (-26,5°)');
+          btc.textContent = '🎥 -26,5° Alinhada';
+          avisar('Câmera: Alinhada perpendicular à rota (-26,5°)');
+        } else if (atual < -0.2) {
+          vis.rotacaoCamera = 0.4636476;
+          vis.zoomCamera = 1.15;
+          btc.textContent = '🎥 +26,5° Flanco';
+          avisar('Câmera: Vista do flanco (+26,5°)');
+        } else {
+          vis.rotacaoCamera = 0;
+          vis.zoomCamera = 1.05;
+          btc.textContent = '🎥 0° Clássica';
+          avisar('Câmera: Isométrica frontal padrão (0°)');
         }
       });
     }
